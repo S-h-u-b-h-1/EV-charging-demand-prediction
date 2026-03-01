@@ -1,77 +1,41 @@
-import sys
+import streamlit as st
+import pandas as pd
+import joblib
 import os
 
-# Get project root directory
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+st.set_page_config(page_title="EV Demand Prediction", layout="wide")
 
-# Add root to python path
-if ROOT_DIR not in sys.path:
-    sys.path.append(ROOT_DIR)
+st.title("🚗 EV Charging Demand Prediction")
 
-import streamlit as st
-import numpy as np
-import joblib
+st.write("Upload model-ready CSV file to predict EV demand.")
 
-# Correct absolute model path
-MODEL_PATH = os.path.join(ROOT_DIR, "models", "trained_model.pkl")
+# Load model (correct path)
+model_path = os.path.join("models", "best_ev_demand_model.pkl")
+model = joblib.load(model_path)
 
-st.title("EV Charging Demand Predictor ⚡")
+uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
-# Debug info
-st.write("Root directory:", ROOT_DIR)
-st.write("Model path:", MODEL_PATH)
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
 
-# Check model exists
-if not os.path.exists(MODEL_PATH):
-    st.error("❌ Model file not found. Ensure trained_model.pkl is in models folder.")
-    st.stop()
+    st.subheader("Uploaded Data Preview")
+    st.dataframe(df.head())
 
-# Load model safely
-try:
-    model = joblib.load(MODEL_PATH)
-    st.success("✅ Model loaded successfully")
-except Exception as e:
-    st.error(f"❌ Model loading failed: {e}")
-    st.stop()
+    features = [
+        "station_encoded",
+        "hour","dayofweek","month","day","weekofyear",
+        "hour_sin","hour_cos","dow_sin","dow_cos",
+        "lag_1","rolling_3h","rolling_24h"
+    ]
 
+    if all(col in df.columns for col in features):
+        predictions = model.predict(df[features])
+        df["Predicted_kWh"] = predictions
 
-# UI inputs
-station = st.number_input("Station ID", 0, 100, 1)
-hour = st.slider("Hour", 0, 23, 12)
-dow = st.slider("Day of Week", 0, 6, 2)
-month = st.slider("Month", 1, 12, 6)
+        st.subheader("Predictions")
+        st.dataframe(df[["Predicted_kWh"]].head())
 
-lag1 = st.number_input("Lag 1", value=10.0)
-roll3 = st.number_input("Rolling 3h", value=10.0)
-roll24 = st.number_input("Rolling 24h", value=10.0)
+        st.line_chart(df["Predicted_kWh"])
 
-# Feature engineering
-hour_sin = np.sin(2*np.pi*hour/24)
-hour_cos = np.cos(2*np.pi*hour/24)
-
-dow_sin = np.sin(2*np.pi*dow/7)
-dow_cos = np.cos(2*np.pi*dow/7)
-
-features = np.array([[
-    station,
-    hour,
-    dow,
-    month,
-    1,
-    1,
-    hour_sin,
-    hour_cos,
-    dow_sin,
-    dow_cos,
-    lag1,
-    roll3,
-    roll24
-]])
-
-# Prediction
-if st.button("Predict Demand"):
-    try:
-        prediction = model.predict(features)[0]
-        st.success(f"Predicted demand: {prediction:.2f} kWh ⚡")
-    except Exception as e:
-        st.error(f"Prediction failed: {e}")
+    else:
+        st.error("CSV does not contain required feature columns.")
