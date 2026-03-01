@@ -42,10 +42,43 @@ uploaded_file = st.file_uploader(
     type=["csv"]
 )
 
+# -----------------------------
+# SMART DATA HANDLING
+# -----------------------------
 if uploaded_file:
 
     df = pd.read_csv(uploaded_file)
+    st.success("File uploaded successfully.")
 
+    # Case 1: RAW SESSION DATA
+    if {"connectionTime","disconnectTime","kWhDelivered","stationID"}.issubset(df.columns):
+
+        st.info("Raw session data detected. Performing automatic preprocessing...")
+
+        df = df.dropna(subset=["connectionTime","disconnectTime","kWhDelivered","stationID"])
+
+        df["connectionTime"] = pd.to_datetime(df["connectionTime"], errors="coerce")
+        df["disconnectTime"] = pd.to_datetime(df["disconnectTime"], errors="coerce")
+
+        df = df.dropna()
+        df = df[df["kWhDelivered"] > 0]
+        df = df[df["disconnectTime"] > df["connectionTime"]]
+
+        df["hour_timestamp"] = df["connectionTime"].dt.floor("h")
+
+        hourly = (
+            df.groupby(["stationID","hour_timestamp"])["kWhDelivered"]
+            .sum()
+            .reset_index()
+        )
+
+        hourly.rename(columns={"kWhDelivered":"total_kWh"}, inplace=True)
+
+        df = hourly
+
+        st.success("Preprocessing complete.")
+
+    # Case 2: Already model-ready
     required_features = [
         "station_encoded",
         "hour","dayofweek","month","day","weekofyear",
@@ -54,10 +87,21 @@ if uploaded_file:
     ]
 
     if not all(col in df.columns for col in required_features):
-        st.error("Dataset missing required features.")
-        st.stop()
 
-    st.success("Data successfully loaded.")
+        st.warning("""
+        Uploaded dataset does not contain required model features.
+
+        Required:
+        - Time-based features (hour, dayofweek, month, etc.)
+        - Lag features
+        - Rolling averages
+
+        Please upload either:
+        1. Raw charging session dataset, OR
+        2. Model-ready hourly dataset.
+        """)
+
+        st.stop()
 
     # -----------------------------
     # STATION SELECTION
