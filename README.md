@@ -33,6 +33,20 @@ This system predicts hourly station-level charging demand and extracts insights 
 
 ## 3. System Architecture
 
+### System Design Diagram
+
+The EV Charging Demand Prediction System follows a three-layered architecture:
+
+![System Design Diagram](https://github.com/S-h-u-b-h-1/EV-charging-demand-prediction/assets/system_design.png)
+
+**Architecture Components:**
+
+- **Data Layer:** Handles raw charging data ingestion, preprocessing, cleaning, and hourly aggregation with persisted artifacts (trained models and scalers)
+- **ML Pipeline:** Executes feature engineering, creates lag and rolling features using LightGBM and baseline models, and evaluates performance using RMSE, MAE, and R²
+- **Serving Layer:** Delivers real-time inference through Streamlit dashboard, processes user input, applies feature transformations, and returns predictions
+
+---
+
 ### Phase 1 – Predictive Demand Engine
 
 Workflow:
@@ -200,5 +214,3 @@ streamlit run app/streamlit_app.py
 ## 11. Disclaimer
 
 This project is developed for academic purposes. The demand predictions are based on historical data and do not represent real-time operational grid decisions.
-
----
