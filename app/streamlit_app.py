@@ -1,61 +1,101 @@
-import sys, os
-sys.path.append(os.path.abspath("."))
+import sys
+import os
+
+# Fix import paths for Streamlit Cloud
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 
 import streamlit as st
 import numpy as np
 import joblib
 
-from src.train import train_pipeline
+# Optional: only if you really want training capability
+# from train_pipeline import train_pipeline
 
 
-MODEL_PATH = "models/trained_model.pkl"
-DATA_PATH = "data/raw/raw_dataset.csv"
+# Correct absolute paths
+MODEL_PATH = os.path.join(BASE_DIR, "models", "trained_model.pkl")
+DATA_PATH = os.path.join(BASE_DIR, "data", "raw", "raw_dataset.csv")
+
+
+# Page config
+st.set_page_config(page_title="EV Charging Demand Predictor", page_icon="⚡")
 
 
 st.title("EV Charging Demand Predictor ⚡")
 
 
-# Train if model missing
-if not os.path.exists(MODEL_PATH):
+# Load model safely with caching
+@st.cache_resource
+def load_model():
 
-    st.write("Training model...")
+    if not os.path.exists(MODEL_PATH):
+        st.error(f"Model not found at {MODEL_PATH}")
+        st.stop()
 
-    train_pipeline(DATA_PATH)
-
-    st.success("Model trained successfully")
+    model = joblib.load(MODEL_PATH)
+    return model
 
 
 # Load model
-model = joblib.load(MODEL_PATH)
+model = load_model()
+
+st.success("Model loaded successfully ✅")
 
 
-# UI
-station = st.number_input("Station", 0, 100, 1)
+# UI Inputs
+st.header("Enter Features")
+
+station = st.number_input("Station ID", min_value=0, max_value=100, value=1)
+
 hour = st.slider("Hour", 0, 23, 12)
+
 dow = st.slider("Day of week", 0, 6, 2)
+
 month = st.slider("Month", 1, 12, 6)
 
-lag1 = st.number_input("Lag 1", value=10.0)
-roll3 = st.number_input("Rolling 3h", value=10.0)
-roll24 = st.number_input("Rolling 24h", value=10.0)
+lag1 = st.number_input("Lag 1 hour demand", value=10.0)
+
+roll3 = st.number_input("Rolling 3-hour demand", value=10.0)
+
+roll24 = st.number_input("Rolling 24-hour demand", value=10.0)
 
 
-hour_sin = np.sin(2*np.pi*hour/24)
-hour_cos = np.cos(2*np.pi*hour/24)
+# Feature engineering
+hour_sin = np.sin(2 * np.pi * hour / 24)
+hour_cos = np.cos(2 * np.pi * hour / 24)
 
-dow_sin = np.sin(2*np.pi*dow/7)
-dow_cos = np.cos(2*np.pi*dow/7)
+dow_sin = np.sin(2 * np.pi * dow / 7)
+dow_cos = np.cos(2 * np.pi * dow / 7)
 
 
+# Feature vector
 features = np.array([[
-    station,hour,dow,month,1,1,
-    hour_sin,hour_cos,dow_sin,dow_cos,
-    lag1,roll3,roll24
+    station,
+    hour,
+    dow,
+    month,
+    1,   # day placeholder
+    1,   # week placeholder
+    hour_sin,
+    hour_cos,
+    dow_sin,
+    dow_cos,
+    lag1,
+    roll3,
+    roll24
 ]])
 
 
-if st.button("Predict"):
+# Prediction button
+if st.button("Predict Demand"):
 
-    pred = model.predict(features)[0]
+    try:
 
-    st.success(f"Prediction: {pred:.2f} kWh")
+        prediction = model.predict(features)[0]
+
+        st.success(f"Predicted Charging Demand: {prediction:.2f} kWh ⚡")
+
+    except Exception as e:
+
+        st.error(f"Prediction failed: {e}")
