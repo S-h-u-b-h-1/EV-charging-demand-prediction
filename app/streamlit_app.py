@@ -1,52 +1,61 @@
-import pandas as pd
-from src.preprocessing import load_data, clean_data, aggregate_hourly
-from src.feature_engineering import add_time_features, add_lag_features
-from src.model import get_models
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import sys, os
+sys.path.append(os.path.abspath("."))
+
+import streamlit as st
 import numpy as np
 import joblib
 
-def train_pipeline(json_path):
+from src.train import train_pipeline
 
-    df = load_data(json_path)
-    df = clean_data(df)
-    hourly = aggregate_hourly(df)
 
-    hourly = add_time_features(hourly)
-    hourly = add_lag_features(hourly)
+MODEL_PATH = "models/trained_model.pkl"
+DATA_PATH = "data/raw/raw_dataset.csv"
 
-    split_index = int(len(hourly)*0.8)
-    split_date = hourly["hour_timestamp"].sort_values().iloc[split_index]
 
-    train = hourly[hourly["hour_timestamp"] < split_date]
-    test  = hourly[hourly["hour_timestamp"] >= split_date]
+st.title("EV Charging Demand Predictor ⚡")
 
-    features = [
-        "station_encoded","hour","dayofweek","month","day","weekofyear",
-        "hour_sin","hour_cos","dow_sin","dow_cos",
-        "lag_1","rolling_3h","rolling_24h"
-    ]
 
-    X_train, y_train = train[features], train["total_kWh"]
-    X_test, y_test = test[features], test["total_kWh"]
+# Train if model missing
+if not os.path.exists(MODEL_PATH):
 
-    models = get_models()
+    st.write("Training model...")
 
-    results = []
+    train_pipeline(DATA_PATH)
 
-    for name, model in models.items():
-        model.fit(X_train,y_train)
-        preds = model.predict(X_test)
+    st.success("Model trained successfully")
 
-        mae = mean_absolute_error(y_test,preds)
-        rmse = np.sqrt(mean_squared_error(y_test,preds))
-        r2 = r2_score(y_test,preds)
 
-        results.append((name,rmse))
+# Load model
+model = joblib.load(MODEL_PATH)
 
-    best_model_name = sorted(results,key=lambda x: x[1])[0][0]
-    best_model = models[best_model_name]
 
-    joblib.dump(best_model,"models/trained_model.pkl")
+# UI
+station = st.number_input("Station", 0, 100, 1)
+hour = st.slider("Hour", 0, 23, 12)
+dow = st.slider("Day of week", 0, 6, 2)
+month = st.slider("Month", 1, 12, 6)
 
-    return best_model_name
+lag1 = st.number_input("Lag 1", value=10.0)
+roll3 = st.number_input("Rolling 3h", value=10.0)
+roll24 = st.number_input("Rolling 24h", value=10.0)
+
+
+hour_sin = np.sin(2*np.pi*hour/24)
+hour_cos = np.cos(2*np.pi*hour/24)
+
+dow_sin = np.sin(2*np.pi*dow/7)
+dow_cos = np.cos(2*np.pi*dow/7)
+
+
+features = np.array([[
+    station,hour,dow,month,1,1,
+    hour_sin,hour_cos,dow_sin,dow_cos,
+    lag1,roll3,roll24
+]])
+
+
+if st.button("Predict"):
+
+    pred = model.predict(features)[0]
+
+    st.success(f"Prediction: {pred:.2f} kWh")
