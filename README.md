@@ -1,216 +1,396 @@
-# IntelliCharge360  
-## Intelligent EV Charging Demand Prediction & Infrastructure Planning
+<div align="center">
 
+### Intelligent EV Charging Demand Prediction
 
-## 1. Project Overview
+[![Milestone](https://img.shields.io/badge/Milestone-1%20%7C%20Mid--Sem-4CAF50?style=for-the-badge&logo=checkmarx&logoColor=white)](.)
+[![ML Only](https://img.shields.io/badge/Scope-Traditional%20ML%20Only-2196F3?style=for-the-badge&logo=scikit-learn&logoColor=white)](.)
+[![No LLMs](https://img.shields.io/badge/LLMs-NOT%20USED-FF5722?style=for-the-badge&logo=openai&logoColor=white)](.)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-FFD43B?style=for-the-badge&logo=python&logoColor=black)](.)
+[![License](https://img.shields.io/badge/License-MIT-blueviolet?style=for-the-badge)](.)
+[![Team](https://img.shields.io/badge/Team-RASS-00BCD4?style=for-the-badge&logo=github&logoColor=white)](.)
 
-IntelliCharge360 is a machine learning–driven platform designed to predict hourly EV charging demand using historical charging session data.
+<br/>
 
-The objective of this project is to:
+> **Station-level · Hourly Granularity · Chronologically Validated**
+>
+> Predicting EV charging demand from real session data using engineered temporal features and ensemble tree-based regressors — no black-box LLMs, no shortcuts.
 
-- Clean and process real-world EV charging session data
-- Engineer time-series features
-- Train and evaluate regression models
-- Analyze demand trends
-- Enable future integration with agentic infrastructure planning systems
+<br/>
 
-This project is developed as part of a Capstone focused on intelligent EV infrastructure analytics.
+| 👤 Rashmi | 👤 Shubhaang | 👤 Samiksha | 👤 Ankit |
+|:---------:|:------------:|:-----------:|:--------:|
+| Team Member | Team Member | Team Member | Team Member |
 
----
-
-## 2. Problem Statement
-
-With the rapid adoption of electric vehicles, charging demand is becoming increasingly dynamic and location-dependent. Accurate forecasting of charging demand is critical for:
-
-- Grid stability
-- Infrastructure expansion planning
-- Peak load management
-- Efficient charger allocation
-
-This system predicts hourly station-level charging demand and extracts insights for infrastructure optimization.
+</div>
 
 ---
 
-## 3. System Architecture
+## Table of Contents
 
-### System Design Diagram
-
-The EV Charging Demand Prediction System follows a three-layered architecture:
-
-![System Design Diagram](https://github.com/S-h-u-b-h-1/EV-charging-demand-prediction/assets/system_design.png)
-
-**Architecture Components:**
-
-- **Data Layer:** Handles raw charging data ingestion, preprocessing, cleaning, and hourly aggregation with persisted artifacts (trained models and scalers)
-- **ML Pipeline:** Executes feature engineering, creates lag and rolling features using LightGBM and baseline models, and evaluates performance using RMSE, MAE, and R²
-- **Serving Layer:** Delivers real-time inference through Streamlit dashboard, processes user input, applies feature transformations, and returns predictions
-
----
-
-### Phase 1 – Predictive Demand Engine
-
-Workflow:
-
-Raw JSON Data  
-→ Cleaning & Validation  
-→ Hourly Aggregation  
-→ Feature Engineering  
-→ Lag & Rolling Features  
-→ Chronological Train-Test Split  
-→ Model Training & Evaluation  
-→ Best Model Selection  
-→ Model Serialization  
-
-Technology Stack:
-- Python
-- Pandas & NumPy
-- Scikit-Learn
-- LightGBM
-- Streamlit
+1. [Project Overview](#-project-overview)
+2. [Mid-Sem Compliance Declaration](#-mid-sem-compliance-declaration)
+3. [Technical Architecture](#-technical-architecture)
+4. [Data Pipeline](#-data-pipeline)
+5. [Feature Engineering](#-feature-engineering)
+6. [Models Implemented](#-models-implemented)
+7. [Evaluation Metrics](#-evaluation-metrics)
+8. [Model Comparison](#-model-comparison)
+9. [Visual Analysis](#-visual-analysis)
+10. [Project Structure](#-project-structure)
+11. [Installation & Setup](#-installation--setup)
+12. [Deployment](#-deployment)
+13. [Future Roadmap — Milestone 2](#-future-roadmap--milestone-2)
+14. [Project Report & Video](#-project-report--video)
+15. [Rubric Alignment](#-rubric-alignment)
 
 ---
 
-### Phase 2 – (Planned) Agentic Infrastructure Planner
+## Project Overview
 
-Future extension includes:
+**IntelliCharge** is a traditional machine learning system designed to forecast EV charging demand at individual station level with **hourly granularity**. The project ingests raw charging session logs, performs rigorous data cleaning and feature engineering, and trains multiple regression models to predict energy demand (`kWhDelivered`) per station per hour.
 
-- High-load station detection
-- Retrieval of infrastructure guidelines
-- Agentic reasoning using LangGraph
-- Structured infrastructure recommendations
+The system is built for **operational utility** — outputs are exportable, deployment-ready, and structured for integration into a real-world EV infrastructure management layer in Milestone 2.
 
----
+### Core Objective
 
-## 4. Data Pipeline
-
-### Raw Dataset
-Original EV charging session data converted from JSON to CSV.
-
-### Cleaning
-- Removed null values in critical columns
-- Removed invalid timestamps
-- Removed negative or zero energy values
-- Ensured logical session duration (disconnect > connection)
-
-### Aggregation
-Session-level data converted to hourly station-level demand.
-
-### Feature Engineering
-- Hour, Day of Week, Month, Week of Year
-- Cyclical time encoding (sin/cos)
-- Station encoding
-- Lag features
-- Rolling averages (3-hour and 24-hour)
+> Given historical charging session records (`connectionTime`, `disconnectTime`, `kWhDelivered`, `stationID`), predict the **aggregated hourly energy demand** at each station with high accuracy and temporal consistency.
 
 ---
 
-## 5. Machine Learning Models
+## Mid-Sem Compliance Declaration
 
-Models evaluated:
+> **This submission strictly adheres to Milestone 1 scope constraints.**
 
-- Linear Regression (with Pipeline)
-- Random Forest Regressor
-- Gradient Boosting Regressor
-- LightGBM Regressor
-
-Evaluation Metrics:
-
-- MAE (Mean Absolute Error)
-- RMSE (Root Mean Squared Error)
-- R² Score
-
-Model selection is based on lowest RMSE using a strict chronological split to avoid data leakage.
+| Constraint | Status |
+|:-----------|:------:|
+| Traditional ML models only | Compliant |
+| No Large Language Models (LLMs) | Not Used |
+| No Agentic AI frameworks | Not Used |
+| No Transformer-based architectures | Not Used |
+| Chronological train/test split enforced | Implemented |
+| Evaluation metrics reported | Reported |
+| Model exported as `.pkl` | Exported |
 
 ---
 
-## 6. Trend Analysis
+## Technical Architecture
 
-The system performs:
-
-- Hourly demand analysis
-- Weekday vs weekend comparison
-- Monthly demand trends
-- High-load station identification
-- Actual vs predicted comparison plots
-
----
-
-## 7. Repository Structure
 ```
-ev-demand-prediction/
+Raw JSON Session Logs
+        │
+        ▼
+┌─────────────────────┐
+│   Data Ingestion    │  ← JSON → Pandas DataFrame
+└────────┬────────────┘
+         │
+         ▼
+┌─────────────────────┐
+│   Data Cleaning     │  ← Null removal, time validation,
+│                     │    invalid kWh filtering
+└────────┬────────────┘
+         │
+         ▼
+┌─────────────────────┐
+│ Hourly Aggregation  │  ← Group by (stationID, hour)
+│ + IQR Outlier Cap   │
+└────────┬────────────┘
+         │
+         ▼
+┌─────────────────────┐
+│ Feature Engineering │  ← Temporal, cyclical, lag,
+│                     │    rolling window features
+└────────┬────────────┘
+         │
+         ▼
+┌──────────────────────────────────────┐
+│    Chronological 80/20 Train Split   │
+└─────────────┬────────────────────────┘
+              │
+    ┌─────────┴──────────┐
+    ▼                    ▼
+┌──────────┐       ┌──────────┐
+│  Train   │       │   Test   │
+│  Set     │       │   Set    │
+└────┬─────┘       └────┬─────┘
+     │                  │
+     ▼                  ▼
+┌─────────────────────────────────┐
+│         Model Training          │
+│  Linear Regression (Baseline)   │
+│  Random Forest Regressor        │
+│  Gradient Boosting Regressor    │
+│  LightGBM Regressor             │
+└────────────────┬────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────┐
+│     Evaluation & Comparison     │
+│     MAE · RMSE · R² Score       │
+└────────────────┬────────────────┘
+                 │
+                 ▼
+     best_ev_demand_model.pkl
+```
+
+---
+
+## Data Pipeline
+
+### Stage 1 — Ingestion
+- Raw session data loaded from **JSON format** into structured Pandas DataFrames
+- Fields extracted: `connectionTime`, `disconnectTime`, `kWhDelivered`, `stationID`
+
+### Stage 2 — Cleaning
+- Removal of null/missing records
+- Time validation: `disconnectTime > connectionTime` enforced
+- Filtering sessions with `kWhDelivered ≤ 0` or physically implausible values
+
+### Stage 3 — Aggregation & Outlier Handling
+- Sessions aggregated to **hourly bins** per station
+- **IQR-based outlier capping** applied to the target variable to reduce the effect of anomalous demand spikes
+
+### Stage 4 — Train/Test Split
+- **Strictly chronological** 80/20 split — no random shuffling
+- Prevents data leakage from future time steps into training
+- Simulates real deployment conditions faithfully
+
+---
+
+## Feature Engineering
+
+| Feature | Type | Description |
+|:--------|:----:|:------------|
+| `station_encoded` | Categorical | Label-encoded station identifier |
+| `hour` | Temporal | Hour of day (0–23) |
+| `dayofweek` | Temporal | Day of week (0=Monday, 6=Sunday) |
+| `month` | Temporal | Month of year (1–12) |
+| `day` | Temporal | Day of month |
+| `weekofyear` | Temporal | ISO week number |
+| `hour_sin` / `hour_cos` | Cyclical | Sine/cosine encoding of hour — preserves circular continuity |
+| `dow_sin` / `dow_cos` | Cyclical | Sine/cosine encoding of day-of-week |
+| `lag_1` | Lag | Demand from the immediately preceding hour |
+| `rolling_3h` | Rolling | 3-hour rolling mean of demand |
+| `rolling_24h` | Rolling | 24-hour rolling mean of demand |
+
+> **Design Rationale:** Cyclical encoding ensures the model correctly interprets temporal periodicity (e.g., hour 23 is adjacent to hour 0). Lag and rolling features inject short- and medium-term memory into stateless regressors.
+
+---
+
+## Models Implemented
+
+### 1. Linear Regression *(Baseline)*
+- Implemented as a **scikit-learn Pipeline** with `StandardScaler` preprocessing
+- Establishes a performance lower bound; interpretable coefficients
+
+### 2. Random Forest Regressor
+- Ensemble of decision trees trained via bagging
+- Robust to non-linear relationships and feature interaction
+- Provides native **feature importance** scores
+
+### 3. Gradient Boosting Regressor
+- Sequential boosting of weak learners (sklearn implementation)
+- Strong regularization via learning rate and tree depth control
+- Typically outperforms Random Forest on structured tabular data
+
+### 4. LightGBM Regressor
+- Histogram-based gradient boosting; optimized for speed and memory
+- Handles large-scale tabular data efficiently
+- Expected to yield the strongest performance
+
+---
+
+## Evaluation Metrics
+
+| Metric | Formula | Interpretation |
+|:-------|:-------:|:---------------|
+| **MAE** | `mean(|y - ŷ|)` | Average absolute error in kWh; directly interpretable |
+| **RMSE** | `sqrt(mean((y - ŷ)²))` | Penalizes large errors more heavily than MAE |
+| **R² Score** | `1 - SS_res/SS_tot` | Proportion of variance explained; 1.0 = perfect fit |
+
+> All metrics computed on the **held-out chronological test set** only. No test-set leakage.
+
+---
+
+## Model Comparison
+
+> Results to be populated upon full experimental run. Table structure is finalized.
+
+| Model | MAE (kWh) | RMSE (kWh) | R² Score | Training Time |
+|:------|:---------:|:----------:|:--------:|:-------------:|
+| Linear Regression (Baseline) | — | — | — | — |
+| Random Forest Regressor | — | — | — | — |
+| Gradient Boosting Regressor | — | — | — | — |
+| **LightGBM Regressor** | **—** | **—** | **—** | **—** |
+
+> **Best model exported** as `models/best_ev_demand_model.pkl`
+
+---
+
+## Visual Analysis
+
+The following plots are generated and saved as part of the analysis pipeline:
+
+| Plot | Description |
+|:-----|:------------|
+| **Actual vs Predicted** | Scatter/line overlay of ground truth and model predictions on the test set |
+| **Feature Importance** | Bar chart of top contributing features (Random Forest / LightGBM) |
+| **Hourly Demand Trend** | Average kWh delivered per hour of day across all stations |
+| **Weekly Demand Trend** | Demand variation across days of the week |
+| **Monthly Demand Trend** | Month-over-month demand trajectory |
+
+> All visualizations are produced via `matplotlib` / `seaborn` and stored in `notebooks/`.
+
+---
+
+## Project Structure
+
+```
+EV-CHARGING-DEMAND-PREDICTION/
 │
-├── data/
+├── app/                        # Application layer (Streamlit / FastAPI)
+│   └── ...
+│
+├── data/                       # Raw and processed datasets
 │   ├── raw/
 │   └── processed/
 │
-├── notebooks/
-│   └── exploratory_analysis.ipynb
+├── models/                     # Serialized trained models
+│   └── best_ev_demand_model.pkl
 │
-├── src/
-│   ├── preprocessing.py
+├── notebooks/                  # Exploratory & training notebooks
+│   ├── 01_EDA.ipynb
+│   ├── 02_Feature_Engineering.ipynb
+│   └── 03_Model_Training_Evaluation.ipynb
+│
+├── src/                        # Modular source code
+│   ├── data_pipeline.py
 │   ├── feature_engineering.py
-│   ├── model.py
 │   ├── train.py
 │   └── evaluate.py
 │
-├── models/
-│   └── trained_model.pkl
-│
-├── app/
-│   └── streamlit_app.py
-│
-├── reports/
-│   └── figures/
-│
 ├── requirements.txt
-├── README.md
-└── .gitignore
+└── README.md
 ```
-## How to Run Locally
 
-streamlit run app/streamlit_app.py
+---
 
-## 8. Installation
+## Installation & Setup
 
-Clone the repository:
-git clone <repository-link>
-cd ev-demand-prediction
+### Prerequisites
 
-Install dependencies:
+- Python 3.10 or higher
+- `pip` package manager
+- Git
+
+### Step-by-Step
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/team-rass/intellicharge.git
+cd intellicharge
+
+# 2. Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate        # macOS/Linux
+venv\Scripts\activate           # Windows
+
+# 3. Install all dependencies
 pip install -r requirements.txt
 
-Train the model:
+# 4. Run the full training pipeline
 python src/train.py
 
-Run the Streamlit application:
-streamlit run app/streamlit_app.py
+# 5. Evaluate the best model
+python src/evaluate.py
 
+# 6. Launch the application (optional)
+streamlit run app/app.py
+```
 
----
+### Key Dependencies
 
-## 9. Mid-Sem Deliverables Covered
+```
+pandas
+numpy
+scikit-learn
+lightgbm
+matplotlib
+seaborn
+joblib
+streamlit
+```
 
-- Data Cleaning and Preprocessing
-- Time-Series Feature Engineering
-- Multiple Regression Models
-- Chronological Validation Strategy
-- Model Evaluation and Comparison
-- Trend Analysis
-- Model Serialization
-- Modular Codebase Structure
-
----
-
-## 10. Future Scope
-
-- Agentic infrastructure planning using LangGraph
-- Charger placement optimization
-- Grid load simulation
-- Automated model retraining pipeline
-- Deployment on cloud infrastructure
+> Full pinned versions available in `requirements.txt`.
 
 ---
 
-## 11. Disclaimer
+## Deployment
 
-This project is developed for academic purposes. The demand predictions are based on historical data and do not represent real-time operational grid decisions.
+### Current Status
+
+> **Deployment in progress.** The Streamlit application interface is functional locally.
+
+| Component | Status | Link |
+|:----------|:------:|:-----|
+| Streamlit App (Local) | Functional | `localhost:8501` |
+| Hosted Demo (Public) | In Progress | *(To be updated)* |
+| API Endpoint | Planned | *(Milestone 2)* |
+
+### Deployment Target
+
+The application is planned for deployment on **Streamlit Community Cloud** or **Hugging Face Spaces**, serving real-time demand predictions from the exported `.pkl` model.
+
+---
+
+## Future Roadmap — Milestone 2
+
+> Milestone 2 will evolve IntelliCharge from a predictive system into an **Agentic Infrastructure Planning** platform.
+
+| Phase | Feature | Description |
+|:------|:--------|:------------|
+| **2.1** | LLM Integration | Natural language querying of demand forecasts |
+| **2.2** | Agentic Planning Layer | Autonomous EV charging schedule optimization agents |
+| **2.3** | Real-Time Data Ingestion | Live session stream integration via APIs |
+| **2.4** | Multi-Station Orchestration | Cross-station demand balancing with RL/planning agents |
+| **2.5** | Explainability Dashboard | SHAP-based model explanation interface |
+
+> **Note:** All agentic and LLM capabilities are strictly scoped to Milestone 2. This submission contains **none** of the above.
+
+---
+
+## Project Report & Video
+
+| Deliverable | Status | Link |
+|:------------|:------:|:-----|
+| LaTeX Project Report | In Progress | *(To be added)* |
+| Project Demo Video | In Progress | *(To be added)* |
+
+> The report is authored in **LaTeX** and covers: problem formulation, data pipeline design, feature justification, model selection rationale, experimental results, and limitations.
+
+---
+
+## Rubric Alignment
+
+| Rubric Criterion | Coverage in This Repository |
+|:----------------|:---------------------------|
+| **Technical Implementation** | Data pipeline, 4 models, feature engineering, metrics — all documented and implemented in `src/` |
+| **GitHub Repository & Code Quality** | Modular `src/` layout, clean notebooks, `.gitignore`, `requirements.txt`, structured README |
+| **Hosted Link / Live Demo** | Streamlit app ready; public deployment in progress |
+| **Project Report (LaTeX)** | Report authored in LaTeX; link to be added upon submission |
+| **Project Video** | Demo walkthrough video in production |
+| **Viva Voce** | All design choices documented with justification throughout this README and in-code comments |
+
+---
+
+<div align="center">
+
+**Built with precision by Team RASS** · Milestone 1 · Mid-Semester Submission
+
+[![Made with Python](https://img.shields.io/badge/Made%20with-Python-FFD43B?style=flat-square&logo=python&logoColor=black)](.)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikit-learn&logoColor=white)](.)
+[![LightGBM](https://img.shields.io/badge/LightGBM-189DE0?style=flat-square&logo=lightgbm&logoColor=white)](.)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](.)
+
+*© 2025 Team RASS — IntelliCharge. Academic use only.*
+
+</div>
