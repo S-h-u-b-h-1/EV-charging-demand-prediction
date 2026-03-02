@@ -1,77 +1,229 @@
-import sys
-import os
-
-# Get project root directory
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# Add root to python path
-if ROOT_DIR not in sys.path:
-    sys.path.append(ROOT_DIR)
-
 import streamlit as st
-import numpy as np
+import pandas as pd
 import joblib
+import os
+import numpy as np
 
-# Correct absolute model path
-MODEL_PATH = os.path.join(ROOT_DIR, "models", "trained_model.pkl")
+st.set_page_config(
+    page_title="IntelliCharge360",
+    layout="wide"
+)
 
-st.title("EV Charging Demand Predictor ⚡")
+# -----------------------------
+# HEADER
+# -----------------------------
+st.title("Intelligent EV Charging Demand & Infrastructure Planning")
 
-# Debug info
-st.write("Root directory:", ROOT_DIR)
-st.write("Model path:", MODEL_PATH)
+st.markdown("""
+A decision-support dashboard for EV infrastructure planners.  
+Upload charging data to forecast demand, detect congestion risk, and generate infrastructure recommendations.
+""")
 
-# Check model exists
+st.divider()
+
+# -----------------------------
+# MODEL LOAD
+# -----------------------------
+MODEL_PATH = "models/best_ev_demand_model.pkl"
+
 if not os.path.exists(MODEL_PATH):
-    st.error("❌ Model file not found. Ensure trained_model.pkl is in models folder.")
+    st.error("Model not found. Deployment configuration issue.")
     st.stop()
 
-# Load model safely
-try:
-    model = joblib.load(MODEL_PATH)
-    st.success("✅ Model loaded successfully")
-except Exception as e:
-    st.error(f"❌ Model loading failed: {e}")
-    st.stop()
+model = joblib.load(MODEL_PATH)
 
+# -----------------------------
+# FILE UPLOAD
+# -----------------------------
+st.subheader("Upload Charging Dataset")
 
-# UI inputs
-station = st.number_input("Station ID", 0, 100, 1)
-hour = st.slider("Hour", 0, 23, 12)
-dow = st.slider("Day of Week", 0, 6, 2)
-month = st.slider("Month", 1, 12, 6)
+uploaded_file = st.file_uploader(
+    "Upload Processed Hourly EV Data (CSV)",
+    type=["csv"]
+)
 
-lag1 = st.number_input("Lag 1", value=10.0)
-roll3 = st.number_input("Rolling 3h", value=10.0)
-roll24 = st.number_input("Rolling 24h", value=10.0)
+# -----------------------------
+# SMART DATA HANDLING
+# -----------------------------
+if uploaded_file:
 
-# Feature engineering
-hour_sin = np.sin(2*np.pi*hour/24)
-hour_cos = np.cos(2*np.pi*hour/24)
+    df = pd.read_csv(uploaded_file)
+    st.success("File uploaded successfully.")
 
-dow_sin = np.sin(2*np.pi*dow/7)
-dow_cos = np.cos(2*np.pi*dow/7)
+    # Case 1: RAW SESSION DATA
+    if {"connectionTime","disconnectTime","kWhDelivered","stationID"}.issubset(df.columns):
 
-features = np.array([[
-    station,
-    hour,
-    dow,
-    month,
-    1,
-    1,
-    hour_sin,
-    hour_cos,
-    dow_sin,
-    dow_cos,
-    lag1,
-    roll3,
-    roll24
-]])
+        st.info("Raw session data detected. Performing automatic preprocessing...")
 
-# Prediction
-if st.button("Predict Demand"):
-    try:
-        prediction = model.predict(features)[0]
-        st.success(f"Predicted demand: {prediction:.2f} kWh ⚡")
-    except Exception as e:
-        st.error(f"Prediction failed: {e}")
+        df = df.dropna(subset=["connectionTime","disconnectTime","kWhDelivered","stationID"])
+
+        df["connectionTime"] = pd.to_datetime(df["connectionTime"], errors="coerce")
+        df["disconnectTime"] = pd.to_datetime(df["disconnectTime"], errors="coerce")
+
+        df = df.dropna()
+        df = df[df["kWhDelivered"] > 0]
+        df = df[df["disconnectTime"] > df["connectionTime"]]
+
+        df["hour_timestamp"] = df["connectionTime"].dt.floor("h")
+
+        hourly = (
+            df.groupby(["stationID","hour_timestamp"])["kWhDelivered"]
+            .sum()
+            .reset_index()
+        )
+
+        hourly.rename(columns={"kWhDelivered":"total_kWh"}, inplace=True)
+
+        df = hourly
+
+        st.success("Preprocessing complete.")
+
+    # Case 2: Already model-ready
+    required_features = [
+        "station_encoded",
+        "hour","dayofweek","month","day","weekofyear",
+        "hour_sin","hour_cos","dow_sin","dow_cos",
+        "lag_1","rolling_3h","rolling_24h"
+    ]
+
+    if not all(col in df.columns for col in required_features):
+
+        st.warning("""
+        Uploaded dataset does not contain required model features.
+
+        Required:
+        - Time-based features (hour, dayofweek, month, etc.)
+        - Lag features
+        - Rolling averages
+
+        Please upload either:
+        1. Raw charging session dataset, OR
+        2. Model-ready hourly dataset.
+        """)
+
+        st.stop()
+
+    # -----------------------------
+    # STATION SELECTION
+    # -----------------------------
+    station_list = sorted(df["station_encoded"].unique())
+
+    selected_station = st.selectbox(
+        "Select Station for Analysis",
+        station_list
+    )
+
+    station_df = df[df["station_encoded"] == selected_station]
+
+    # -----------------------------
+    # PREDICTION
+    # -----------------------------
+    predictions = model.predict(station_df[required_features])
+    station_df["Predicted_kWh"] = predictions
+
+    avg_demand = station_df["Predicted_kWh"].mean()
+    peak_demand = station_df["Predicted_kWh"].max()
+    peak_hour = station_df.loc[
+        station_df["Predicted_kWh"].idxmax(), "hour"
+    ]
+
+    # -----------------------------
+    # EXECUTIVE DASHBOARD
+    # -----------------------------
+    st.subheader("Executive Summary")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    col1.metric("Average Demand (kWh)", round(avg_demand,2))
+    col2.metric("Peak Demand (kWh)", round(peak_demand,2))
+    col3.metric("Peak Hour", f"{int(peak_hour)}:00")
+
+    # Congestion Risk Logic
+    if peak_demand > 25:
+        risk = "High"
+        risk_color = "🔴"
+    elif peak_demand > 15:
+        risk = "Moderate"
+        risk_color = "🟠"
+    else:
+        risk = "Low"
+        risk_color = "🟢"
+
+    col4.metric("Congestion Risk", f"{risk_color} {risk}")
+
+    st.divider()
+
+    # -----------------------------
+    # DEMAND VISUALIZATION
+    # -----------------------------
+    st.subheader("Hourly Demand Forecast")
+
+    hourly_summary = (
+        station_df.groupby("hour")["Predicted_kWh"]
+        .mean()
+        .reset_index()
+    )
+
+    st.line_chart(hourly_summary.set_index("hour"))
+
+    # -----------------------------
+    # INFRASTRUCTURE RECOMMENDATION
+    # -----------------------------
+    st.subheader("Infrastructure Recommendation")
+
+    chargers_needed = int(np.ceil(peak_demand / 10))
+
+    if risk == "High":
+        recommendation = f"""
+        This station shows high congestion risk.  
+        Recommended additional chargers: **{chargers_needed} units**.  
+        Consider load balancing or time-based pricing.
+        """
+    elif risk == "Moderate":
+        recommendation = f"""
+        Demand is moderate.  
+        Monitor peak hours and prepare capacity expansion plan.
+        """
+    else:
+        recommendation = """
+        Current infrastructure is sufficient.  
+        No immediate expansion required.
+        """
+
+    st.info(recommendation)
+
+    # -----------------------------
+    # BUSINESS IMPACT
+    # -----------------------------
+    st.subheader("Operational Insight")
+
+    estimated_daily_energy = station_df["Predicted_kWh"].sum()
+    estimated_revenue = estimated_daily_energy * 15  # assume ₹15 per kWh
+
+    st.markdown(f"""
+    • Estimated Daily Energy Delivered: **{round(estimated_daily_energy,2)} kWh**  
+    • Estimated Daily Revenue (₹15/kWh): **₹{round(estimated_revenue,2)}**  
+    """)
+
+    # -----------------------------
+    # DOWNLOAD REPORT
+    # -----------------------------
+    st.subheader("Download Planning Summary")
+
+    summary_text = f"""
+    Station: {selected_station}
+    Average Demand: {round(avg_demand,2)} kWh
+    Peak Demand: {round(peak_demand,2)} kWh
+    Peak Hour: {peak_hour}:00
+    Congestion Risk: {risk}
+    Estimated Daily Revenue: ₹{round(estimated_revenue,2)}
+    """
+
+    st.download_button(
+        label="Download Summary Report",
+        data=summary_text,
+        file_name="station_planning_summary.txt"
+    )
+
+else:
+    st.info("Upload dataset to start intelligent demand analysis.")
