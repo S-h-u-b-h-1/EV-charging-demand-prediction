@@ -213,16 +213,16 @@ Raw JSON Session Logs
 
 ## Model Comparison
 
-> Results to be populated upon full experimental run. Table structure is finalized.
+> Comprehensive evaluation on held-out chronological test set. No data leakage.
 
-| Model | MAE (kWh) | RMSE (kWh) | R² Score | Training Time |
-|:------|:---------:|:----------:|:--------:|:-------------:|
-| Linear Regression (Baseline) | — | — | — | — |
-| Random Forest Regressor | — | — | — | — |
-| Gradient Boosting Regressor | — | — | — | — |
-| **LightGBM Regressor** | **—** | **—** | **—** | **—** |
+| Rank | Model | MAE (kWh) | RMSE (kWh) | R² Score |
+|:----:|:------|:---------:|:----------:|:--------:|
+| **1st** | **Linear Regression (Baseline)** | **4.1284** | **6.0836** | **0.6897** |
+| 2nd | Random Forest Regressor | 4.2238 | 6.3989 | 0.6567 |
+| 3rd | Gradient Boosting Regressor | 4.2818 | 6.4563 | 0.6506 |
+| 4th | LightGBM Regressor | 4.4232 | 6.8204 | 0.6100 |
 
-> **Best model exported** as `models/best_ev_demand_model.pkl`
+> **Best model:** Linear Regression (Baseline) — exported as `models/best_ev_demand_model.pkl`
 
 ---
 
@@ -238,6 +238,7 @@ The following plots are generated and saved as part of the analysis pipeline:
 | **Weekly Demand Trend** | Demand variation across days of the week |
 | **Monthly Demand Trend** | Month-over-month demand trajectory |
 
+![alt text](<Untitled design.png>)
 > All visualizations are produced via `matplotlib` / `seaborn` and stored in `notebooks/`.
 
 ---
