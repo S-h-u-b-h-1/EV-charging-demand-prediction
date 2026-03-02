@@ -334,7 +334,7 @@ streamlit
 | Component | Status | Link |
 |:----------|:------:|:-----|
 | Streamlit App (Local) | Functional | `localhost:8501` |
-| Hosted Demo (Public) | In Progress | *(To be updated)* |
+| Hosted Demo (Public) | In Progress | https://ev-charging-demand-prediction-2026.streamlit.app/#4fdf7da3 |
 | API Endpoint | Planned | *(Milestone 2)* |
 
 ### Deployment Target
@@ -363,7 +363,7 @@ The application is planned for deployment on **Streamlit Community Cloud** or **
 
 | Deliverable | Status | Link |
 |:------------|:------:|:-----|
-| LaTeX Project Report | In Progress | *(To be added)* |
+| LaTeX Project Report | In Progress | https://www.overleaf.com/read/gzkncnjwyhdh#29da89 |
 | Project Demo Video | In Progress | *(To be added)* |
 
 > The report is authored in **LaTeX** and covers: problem formulation, data pipeline design, feature justification, model selection rationale, experimental results, and limitations.
