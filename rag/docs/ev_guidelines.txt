@@ -1,0 +1,21 @@
+EV Infrastructure Planning and Deployment Guidelines
+
+1. Siting and Spacing Requirements:
+- Urban Fast Charging Hubs: Should have a minimum footprint of 500 square meters. Chargers should be spaced radially at intervals of no more than 3 miles in high-density zones.
+- Highway Corridors: Fast charging stations must be placed every 50 miles along major travel corridors, with a minimum of 4 DC Fast Chargers (150kW+) per site.
+- Accessibility: All charging stations must be ADA compliant, providing adequate space (minimum 11x21 feet per accessible stall) and barrier-free pathways.
+
+2. Load Balancing and Grid Impact:
+- Threshold Management: Sites forecasting peak energy demand over 25 kWh per hour must incorporate load balancing hardware or software to prevent local transformer overload.
+- Time-of-Use Strategies: Stations detecting consistent high demand during peak grid hours (17:00 - 21:00) should implement dynamic pricing to shift loads or cap maximum power output by 20% during these periods.
+- Battery Energy Storage Systems (BESS): Sites with constrained grid capacity and high demand volatility must assess the feasibility of on-site BESS to shave peak loads.
+
+3. Congestion and Queue Mitigation:
+- Capacity Upgrades: Any charging station observing an average queue time indicating a congestion risk or peak utilization exceeding 80% should be prioritized for immediate capacity expansion (adding 2 to 4 chargers).
+- Reservation Systems: Implement advance booking capabilities at stations with heavy congestion to improve throughput and user experience.
+- Real-time Status: Chargers must communicate availability status securely to the central network at a maximum latency of 30 seconds.
+
+4. Zoning and Urban Planning Compliance:
+- Environmental Impact: Surface runoff from charging canopies must be managed through bioswales or existing municipal storm drain systems.
+- Noise Control: In residential-adjacent zones, cooling systems for high-power DCFC equipment must operate below 55 decibels (dBA) at the property line.
+- Signage: Stations must feature high-visibility, externally illuminated signage adhering to local visual pollution ordinances.
