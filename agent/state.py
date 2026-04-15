@@ -1,9 +1,12 @@
-from typing import TypedDict, List, Dict, Any
+from typing import TypedDict, List
+import pandas as pd
 
 class EVState(TypedDict):
-    location_data: Dict[str, Any]
-    demand_forecast: Dict[str, float]
-    high_load_zones: List[Dict[str, Any]]
-    retrieved_guidelines: List[str]
+    predictions: pd.DataFrame
+    avg_demand: float
+    peak_demand: float
+    hotspots: List[str]
+    retrieved_docs: List[str]
+    insights: List[str]
     recommendations: List[str]
-    scheduling_insights: List[str]
+    schedule: List[str]

@@ -150,3 +150,9 @@ dmypy.json
 cython_debug/
 
 
+
+ev_env/
+__pycache__/
+*.pyc
+.faiss_index/
+.env

@@ -1,3 +1,4 @@
+from agent.graph import run_agent
 import streamlit as st
 import pandas as pd
 import joblib
@@ -227,3 +228,24 @@ if uploaded_file:
 
 else:
     st.info("Upload dataset to start intelligent demand analysis.")
+st.header("Agentic Infrastructure Planning")
+
+if st.button("Run Agentic Planning"):
+
+    input_state = {
+        "predictions": predictions_df
+    }
+
+    result = run_agent(input_state)
+
+    st.subheader("High Load Zones")
+    st.write(result["high_load_zones"])
+
+    st.subheader("Insights")
+    st.write(result["insights"])
+
+    st.subheader("Recommendations")
+    st.write(result["recommendations"])
+
+    st.subheader("Scheduling Plan")
+    st.write(result["scheduling_plan"])

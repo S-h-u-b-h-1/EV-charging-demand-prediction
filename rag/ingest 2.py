@@ -26,12 +26,7 @@ def ingest_docs():
     embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
     embeddings = HuggingFaceEmbeddings(model_name=embedding_model)
 
-    db_dir = os.path.join(os.path.dirname(__file__), "faiss_index")
-    os.makedirs(db_dir, exist_ok=True)
-
-    vectorstore.save_local(db_dir)
-
-    print(f"FAISS index saved at {db_dir}")
+    vectorstore = FAISS.from_documents(chunks, embeddings)
     
     db_dir = os.path.join(os.path.dirname(__file__), "faiss_index")
     vectorstore.save_local(db_dir)
