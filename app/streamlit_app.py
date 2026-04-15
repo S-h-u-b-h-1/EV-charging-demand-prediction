@@ -79,12 +79,12 @@ if uploaded_file:
     # PREDICTION
     # -----------------------------
     predictions = model.predict(station_df[required_features])
-    station_df["Predicted_kWh"] = predictions
+    station_df["predicted_demand"] = predictions   # ✅ FIXED NAME
 
-    avg_demand = station_df["Predicted_kWh"].mean()
-    peak_demand = station_df["Predicted_kWh"].max()
+    avg_demand = station_df["predicted_demand"].mean()
+    peak_demand = station_df["predicted_demand"].max()
     peak_hour = int(station_df.loc[
-        station_df["Predicted_kWh"].idxmax(), "hour"
+        station_df["predicted_demand"].idxmax(), "hour"
     ])
 
     # -----------------------------
@@ -117,7 +117,7 @@ if uploaded_file:
     st.subheader("📈 Demand Forecast")
 
     hourly_summary = (
-        station_df.groupby("hour")["Predicted_kWh"]
+        station_df.groupby("hour")["predicted_demand"]
         .mean()
         .reset_index()
     )
@@ -139,11 +139,15 @@ if uploaded_file:
         st.success("Infrastructure sufficient")
 
     # -----------------------------
-    # AGENT INPUT
+    # AGENT INPUT (FINAL FIX)
     # -----------------------------
-    demand_dict = {
-        f"Hour_{int(h)}": float(v)
-        for h, v in zip(station_df["hour"], station_df["Predicted_kWh"])
+    predictions_df = pd.DataFrame({
+    "hour": station_df["hour"],
+    "predicted_demand": station_df["predicted_demand"]
+    })
+
+    input_state = {
+        "predictions": predictions_df.to_dict(orient="records")   # ✅ EXACT MATCH
     }
 
     # -----------------------------
@@ -156,10 +160,6 @@ if uploaded_file:
 
         with st.spinner("Agent reasoning in progress..."):
 
-            input_state = {
-                "demand_forecast": demand_dict
-            }
-
             result = run_agent(input_state)
 
         # -----------------------------
@@ -169,7 +169,12 @@ if uploaded_file:
 
         with col1:
             st.subheader("🔥 High Load Zones")
-            st.success(result.get("high_load_zones", []))
+            zones = result.get("high_load_zones", [])
+
+            if zones:
+                st.success(", ".join(zones))   # ✅ CLEAN DISPLAY
+            else:
+                st.warning("No high load zones detected")
 
             st.subheader("🧠 Insights")
             for i in result.get("insights", []):
@@ -184,15 +189,9 @@ if uploaded_file:
             for s in result.get("scheduling_plan", []):
                 st.write("→", s)
 
-        # -----------------------------
-        # STRUCTURED OUTPUT (VERY IMPORTANT)
-        # -----------------------------
         st.subheader("📦 Structured JSON Output")
         st.json(result)
 
-        # -----------------------------
-        # RAG DEBUG (BONUS MARKS)
-        # -----------------------------
         if "retrieved_docs" in result:
             st.subheader("📚 Retrieved Guidelines (RAG)")
             for doc in result["retrieved_docs"]:

@@ -1,8 +1,7 @@
-from typing import TypedDict, List
-import pandas as pd
+from typing import TypedDict, List, Dict
 
 class EVState(TypedDict):
-    predictions: pd.DataFrame
+    predictions: List[Dict]   # ✅ FIX (was DataFrame)
     avg_demand: float
     peak_demand: float
     hotspots: List[str]
