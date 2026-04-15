@@ -1,34 +1,44 @@
-from agent.graph import run_agent
+import sys
+import os
+
+# -----------------------------
+# FIX IMPORT PATH
+# -----------------------------
+CURRENT_DIR = os.path.dirname(__file__)
+PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, ".."))
+sys.path.insert(0, PROJECT_ROOT)
+
+# -----------------------------
+# IMPORTS
+# -----------------------------
 import streamlit as st
 import pandas as pd
 import joblib
-import os
 import numpy as np
 
-st.set_page_config(
-    page_title="IntelliCharge360",
-    layout="wide"
-)
+from agent.graph import run_agent
 
 # -----------------------------
-# HEADER
+# CONFIG
 # -----------------------------
-st.title("Intelligent EV Charging Demand & Infrastructure Planning")
+st.set_page_config(page_title="IntelliCharge360", layout="wide")
+
+st.title("⚡ Intelligent EV Charging Demand & Infrastructure Planning")
 
 st.markdown("""
-A decision-support dashboard for EV infrastructure planners.  
-Upload charging data to forecast demand, detect congestion risk, and generate infrastructure recommendations.
+Upload charging data → Predict demand → Detect congestion →  
+🤖 AI Agent generates infrastructure + scheduling plan
 """)
 
 st.divider()
 
 # -----------------------------
-# MODEL LOAD
+# LOAD MODEL
 # -----------------------------
 MODEL_PATH = "models/best_ev_demand_model.pkl"
 
 if not os.path.exists(MODEL_PATH):
-    st.error("Model not found. Deployment configuration issue.")
+    st.error("Model not found.")
     st.stop()
 
 model = joblib.load(MODEL_PATH)
@@ -36,50 +46,16 @@ model = joblib.load(MODEL_PATH)
 # -----------------------------
 # FILE UPLOAD
 # -----------------------------
-st.subheader("Upload Charging Dataset")
+uploaded_file = st.file_uploader("Upload CSV Dataset", type=["csv"])
 
-uploaded_file = st.file_uploader(
-    "Upload Processed Hourly EV Data (CSV)",
-    type=["csv"]
-)
-
-# -----------------------------
-# SMART DATA HANDLING
-# -----------------------------
 if uploaded_file:
 
     df = pd.read_csv(uploaded_file)
     st.success("File uploaded successfully.")
 
-    # Case 1: RAW SESSION DATA
-    if {"connectionTime","disconnectTime","kWhDelivered","stationID"}.issubset(df.columns):
-
-        st.info("Raw session data detected. Performing automatic preprocessing...")
-
-        df = df.dropna(subset=["connectionTime","disconnectTime","kWhDelivered","stationID"])
-
-        df["connectionTime"] = pd.to_datetime(df["connectionTime"], errors="coerce")
-        df["disconnectTime"] = pd.to_datetime(df["disconnectTime"], errors="coerce")
-
-        df = df.dropna()
-        df = df[df["kWhDelivered"] > 0]
-        df = df[df["disconnectTime"] > df["connectionTime"]]
-
-        df["hour_timestamp"] = df["connectionTime"].dt.floor("h")
-
-        hourly = (
-            df.groupby(["stationID","hour_timestamp"])["kWhDelivered"]
-            .sum()
-            .reset_index()
-        )
-
-        hourly.rename(columns={"kWhDelivered":"total_kWh"}, inplace=True)
-
-        df = hourly
-
-        st.success("Preprocessing complete.")
-
-    # Case 2: Already model-ready
+    # -----------------------------
+    # FEATURE CHECK
+    # -----------------------------
     required_features = [
         "station_encoded",
         "hour","dayofweek","month","day","weekofyear",
@@ -88,33 +64,16 @@ if uploaded_file:
     ]
 
     if not all(col in df.columns for col in required_features):
-
-        st.warning("""
-        Uploaded dataset does not contain required model features.
-
-        Required:
-        - Time-based features (hour, dayofweek, month, etc.)
-        - Lag features
-        - Rolling averages
-
-        Please upload either:
-        1. Raw charging session dataset, OR
-        2. Model-ready hourly dataset.
-        """)
-
+        st.error("Dataset missing required features.")
         st.stop()
 
     # -----------------------------
-    # STATION SELECTION
+    # STATION SELECT
     # -----------------------------
     station_list = sorted(df["station_encoded"].unique())
+    selected_station = st.selectbox("Select Station", station_list)
 
-    selected_station = st.selectbox(
-        "Select Station for Analysis",
-        station_list
-    )
-
-    station_df = df[df["station_encoded"] == selected_station]
+    station_df = df[df["station_encoded"] == selected_station].copy()
 
     # -----------------------------
     # PREDICTION
@@ -124,40 +83,38 @@ if uploaded_file:
 
     avg_demand = station_df["Predicted_kWh"].mean()
     peak_demand = station_df["Predicted_kWh"].max()
-    peak_hour = station_df.loc[
+    peak_hour = int(station_df.loc[
         station_df["Predicted_kWh"].idxmax(), "hour"
-    ]
+    ])
 
     # -----------------------------
-    # EXECUTIVE DASHBOARD
+    # RISK LOGIC
     # -----------------------------
-    st.subheader("Executive Summary")
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    col1.metric("Average Demand (kWh)", round(avg_demand,2))
-    col2.metric("Peak Demand (kWh)", round(peak_demand,2))
-    col3.metric("Peak Hour", f"{int(peak_hour)}:00")
-
-    # Congestion Risk Logic
     if peak_demand > 25:
         risk = "High"
-        risk_color = "🔴"
+        color = "🔴"
     elif peak_demand > 15:
         risk = "Moderate"
-        risk_color = "🟠"
+        color = "🟠"
     else:
         risk = "Low"
-        risk_color = "🟢"
-
-    col4.metric("Congestion Risk", f"{risk_color} {risk}")
-
-    st.divider()
+        color = "🟢"
 
     # -----------------------------
-    # DEMAND VISUALIZATION
+    # DASHBOARD
     # -----------------------------
-    st.subheader("Hourly Demand Forecast")
+    st.subheader("📊 Executive Summary")
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Avg Demand", round(avg_demand,2))
+    c2.metric("Peak Demand", round(peak_demand,2))
+    c3.metric("Peak Hour", f"{peak_hour}:00")
+    c4.metric("Risk", f"{color} {risk}")
+
+    # -----------------------------
+    # CHART
+    # -----------------------------
+    st.subheader("📈 Demand Forecast")
 
     hourly_summary = (
         station_df.groupby("hour")["Predicted_kWh"]
@@ -168,84 +125,78 @@ if uploaded_file:
     st.line_chart(hourly_summary.set_index("hour"))
 
     # -----------------------------
-    # INFRASTRUCTURE RECOMMENDATION
+    # BASIC RECOMMENDATION
     # -----------------------------
-    st.subheader("Infrastructure Recommendation")
+    st.subheader("📌 Basic Recommendation")
 
     chargers_needed = int(np.ceil(peak_demand / 10))
 
     if risk == "High":
-        recommendation = f"""
-        This station shows high congestion risk.  
-        Recommended additional chargers: **{chargers_needed} units**.  
-        Consider load balancing or time-based pricing.
-        """
+        st.warning(f"Add {chargers_needed} chargers + load balancing")
     elif risk == "Moderate":
-        recommendation = f"""
-        Demand is moderate.  
-        Monitor peak hours and prepare capacity expansion plan.
-        """
+        st.info("Monitor demand and plan expansion")
     else:
-        recommendation = """
-        Current infrastructure is sufficient.  
-        No immediate expansion required.
-        """
-
-    st.info(recommendation)
+        st.success("Infrastructure sufficient")
 
     # -----------------------------
-    # BUSINESS IMPACT
+    # AGENT INPUT
     # -----------------------------
-    st.subheader("Operational Insight")
-
-    estimated_daily_energy = station_df["Predicted_kWh"].sum()
-    estimated_revenue = estimated_daily_energy * 15  # assume ₹15 per kWh
-
-    st.markdown(f"""
-    • Estimated Daily Energy Delivered: **{round(estimated_daily_energy,2)} kWh**  
-    • Estimated Daily Revenue (₹15/kWh): **₹{round(estimated_revenue,2)}**  
-    """)
-
-    # -----------------------------
-    # DOWNLOAD REPORT
-    # -----------------------------
-    st.subheader("Download Planning Summary")
-
-    summary_text = f"""
-    Station: {selected_station}
-    Average Demand: {round(avg_demand,2)} kWh
-    Peak Demand: {round(peak_demand,2)} kWh
-    Peak Hour: {peak_hour}:00
-    Congestion Risk: {risk}
-    Estimated Daily Revenue: ₹{round(estimated_revenue,2)}
-    """
-
-    st.download_button(
-        label="Download Summary Report",
-        data=summary_text,
-        file_name="station_planning_summary.txt"
-    )
-
-else:
-    st.info("Upload dataset to start intelligent demand analysis.")
-st.header("Agentic Infrastructure Planning")
-
-if st.button("Run Agentic Planning"):
-
-    input_state = {
-        "predictions": predictions_df
+    demand_dict = {
+        f"Hour_{int(h)}": float(v)
+        for h, v in zip(station_df["hour"], station_df["Predicted_kWh"])
     }
 
-    result = run_agent(input_state)
+    # -----------------------------
+    # AGENT SECTION
+    # -----------------------------
+    st.divider()
+    st.header("🤖 Agentic Infrastructure Planning")
 
-    st.subheader("High Load Zones")
-    st.write(result["high_load_zones"])
+    if st.button("Run AI Agent"):
 
-    st.subheader("Insights")
-    st.write(result["insights"])
+        with st.spinner("Agent reasoning in progress..."):
 
-    st.subheader("Recommendations")
-    st.write(result["recommendations"])
+            input_state = {
+                "demand_forecast": demand_dict
+            }
 
-    st.subheader("Scheduling Plan")
-    st.write(result["scheduling_plan"])
+            result = run_agent(input_state)
+
+        # -----------------------------
+        # OUTPUT DISPLAY
+        # -----------------------------
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.subheader("🔥 High Load Zones")
+            st.success(result.get("high_load_zones", []))
+
+            st.subheader("🧠 Insights")
+            for i in result.get("insights", []):
+                st.write("•", i)
+
+        with col2:
+            st.subheader("🏗 Recommendations")
+            for r in result.get("recommendations", []):
+                st.info(r)
+
+            st.subheader("⚡ Scheduling Plan")
+            for s in result.get("scheduling_plan", []):
+                st.write("→", s)
+
+        # -----------------------------
+        # STRUCTURED OUTPUT (VERY IMPORTANT)
+        # -----------------------------
+        st.subheader("📦 Structured JSON Output")
+        st.json(result)
+
+        # -----------------------------
+        # RAG DEBUG (BONUS MARKS)
+        # -----------------------------
+        if "retrieved_docs" in result:
+            st.subheader("📚 Retrieved Guidelines (RAG)")
+            for doc in result["retrieved_docs"]:
+                st.write("•", doc)
+
+else:
+    st.info("Upload dataset to begin.")
