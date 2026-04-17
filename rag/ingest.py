@@ -3,11 +3,14 @@ from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 def ingest_docs():
     docs_dir = os.path.join(os.path.dirname(__file__), "docs")
     if not os.path.exists(docs_dir):
-        print(f"Directory {docs_dir} not found.")
+        logger.error("Directory %s not found.", docs_dir)
         return
 
     documents = []
@@ -17,7 +20,7 @@ def ingest_docs():
             documents.extend(loader.load())
 
     if not documents:
-        print("No documents found to ingest.")
+        logger.warning("No documents found to ingest.")
         return
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
@@ -29,13 +32,14 @@ def ingest_docs():
     db_dir = os.path.join(os.path.dirname(__file__), "faiss_index")
     os.makedirs(db_dir, exist_ok=True)
 
+    vectorstore = FAISS.from_documents(chunks, embeddings)
     vectorstore.save_local(db_dir)
-
-    print(f"FAISS index saved at {db_dir}")
-    
-    db_dir = os.path.join(os.path.dirname(__file__), "faiss_index")
-    vectorstore.save_local(db_dir)
-    print(f"Successfully ingested {len(documents)} document(s) into {len(chunks)} chunks and saved FAISS index to {db_dir}.")
+    logger.info(
+        "Successfully ingested %s document(s) into %s chunks and saved FAISS index to %s.",
+        len(documents),
+        len(chunks),
+        db_dir,
+    )
 
 if __name__ == "__main__":
     ingest_docs()
