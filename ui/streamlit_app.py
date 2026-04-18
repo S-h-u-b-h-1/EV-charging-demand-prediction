@@ -156,10 +156,11 @@ def render_header() -> None:
     )
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Workflow", "LangGraph")
-    c2.metric("Retrieval", "FAISS RAG")
-    c3.metric("Reasoning", "Rules + LLM")
-    c4.metric("UI", "Streamlit")
+
+    c1.info("Workflow\n\nLangGraph")
+    c2.info("Retrieval\n\nFAISS RAG")
+    c3.info("Reasoning\n\nRules + LLM")
+    c4.info("UI\n\nStreamlit")
 
     st.markdown("<div class='section-gap'></div>", unsafe_allow_html=True)
 
