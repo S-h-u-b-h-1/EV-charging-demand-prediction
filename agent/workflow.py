@@ -1,5 +1,6 @@
 from __future__ import annotations
-
+from dotenv import load_dotenv
+load_dotenv()
 import math
 from typing import Any
 
@@ -12,6 +13,8 @@ from ml.inference import PREDICTION_FAILURE_MESSAGE, run_prediction
 from rag.vectorstore import retrieve_guidelines
 from utils.logger import get_logger
 from utils.validation import build_data_quality_summary, prepare_feature_frame
+from groq import Groq
+import os
 
 logger = get_logger(__name__)
 
@@ -137,6 +140,8 @@ def reasoning_node(state: EVAgentState) -> EVAgentState:
         reasons = data_quality.get("insufficient_reasons", [])
         state["insufficient_data"] = True
         state["reasoning"] = [INSUFFICIENT_DATA_MESSAGE] + reasons
+        state["reasoning_summary"] = INSUFFICIENT_DATA_MESSAGE
+        state["llm_used"] = False
         return state
 
     hourly = prediction_df.groupby("hour")["predicted_demand"].mean().reset_index()
@@ -146,27 +151,93 @@ def reasoning_node(state: EVAgentState) -> EVAgentState:
     peak_hour = int(peak_row["hour"])
 
     charger_type, nominal_capacity, charger_cost = _select_charger_profile(peak_demand)
-    chosen_count, chosen_utilization, alternatives = _optimize_charger_count(peak_demand, nominal_capacity)
+    chosen_count, chosen_utilization, alternatives = _optimize_charger_count(
+        peak_demand, nominal_capacity
+    )
+
     load_balancing_required = peak_demand > 25
-    grid_status = "Load balancing required to avoid transformer overload." if load_balancing_required else "Grid load remains within normal operating threshold."
+    grid_status = (
+        "Load balancing required to avoid transformer overload."
+        if load_balancing_required
+        else "Grid load remains within normal operating threshold."
+    )
+
     smoothing_target = max(avg_demand, peak_demand * 0.85)
 
     reasoning = [
         f"Peak demand is {peak_demand:.2f} kWh at {peak_hour}:00 with average demand {avg_demand:.2f} kWh.",
         f"Selected {chosen_count} {charger_type} because peak-time utilization is {chosen_utilization * 100:.1f}%, which stays near the 70-90% target band.",
-        f"Using fewer chargers would push utilization above {alternatives['fewer_utilization'] * 100:.1f}% and risk queuing or overload." if alternatives["fewer_utilization"] is not None else "A lower charger count would not safely absorb the peak hour.",
-        f"Adding more chargers would drop utilization to {alternatives['more_utilization'] * 100:.1f}%, increasing idle infrastructure cost." if alternatives["more_utilization"] is not None else "The selected charger count already sits at the practical lower-cost boundary.",
+        (
+            f"Using fewer chargers would push utilization above {alternatives['fewer_utilization'] * 100:.1f}% and risk queuing or overload."
+            if alternatives["fewer_utilization"] is not None
+            else "A lower charger count would not safely absorb the peak hour."
+        ),
+        (
+            f"Adding more chargers would drop utilization to {alternatives['more_utilization'] * 100:.1f}%, increasing idle infrastructure cost."
+            if alternatives["more_utilization"] is not None
+            else "The selected charger count already sits at the practical lower-cost boundary."
+        ),
         f"Peak load smoothing target is {smoothing_target:.2f} kWh, so scheduling should shift discretionary demand away from the highest-load window.",
         grid_status,
     ]
 
+    llm_text = ""
+    state["llm_used"] = False
+
+    try:
+        api_key = os.getenv("GROQ_API_KEY")
+        if api_key:
+            client = Groq(api_key=api_key)
+
+            rag_context = "\n".join(state.get("retrieved_docs", []))[:2000]
+
+            prompt = f"""
+You are an EV infrastructure planning expert.
+
+Demand Summary:
+- Peak demand: {peak_demand:.2f} kWh
+- Peak hour: {peak_hour}:00
+- Average demand: {avg_demand:.2f} kWh
+- Recommended chargers: {chosen_count}
+- Charger type: {charger_type}
+
+Retrieved Guidelines:
+{rag_context}
+
+Write a short planning rationale in 4 bullet points covering:
+1. Why this charger count is correct
+2. Grid risk level
+3. Scheduling strategy
+4. Cost vs utilization tradeoff
+"""
+
+            response = client.chat.completions.create(
+                model="llama3-8b-8192",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=300,
+            )
+
+            llm_text = response.choices[0].message.content.strip()
+            if llm_text:
+                reasoning.append(f"LLM Insight:\n{llm_text}")
+                state["llm_used"] = True
+        else:
+            logger.warning("GROQ_API_KEY is missing; using rule-based reasoning only.")
+
+    except Exception as e:
+        logger.warning("LLM call failed: %s", e)
+
     state["reasoning"] = reasoning
+    state["reasoning_summary"] = " ".join(reasoning)
+    state["llm_reasoning"] = llm_text
+
     state["summary"] = {
         "avg_demand": avg_demand,
         "peak_demand": peak_demand,
         "peak_hour": f"{peak_hour}:00",
         "risk_level": _risk_level(peak_demand),
     }
+
     state["optimization"] = {
         "charger_type": charger_type,
         "charger_capacity_kwh": nominal_capacity,
@@ -177,7 +248,7 @@ def reasoning_node(state: EVAgentState) -> EVAgentState:
         "peak_hour": peak_hour,
         "avg_demand": avg_demand,
     }
-    state["reasoning_summary"] = " ".join(reasoning)
+
     return state
 
 
