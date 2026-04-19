@@ -1,8 +1,8 @@
 from __future__ import annotations
-
+ 
 from typing import Any, TypedDict
-
-
+ 
+ 
 class EVAgentState(TypedDict, total=False):
     raw_data: list[dict[str, Any]]
     processed_data: list[dict[str, Any]]
@@ -21,6 +21,10 @@ class EVAgentState(TypedDict, total=False):
     warnings: list[str]
     rag_fallback_used: bool
     insufficient_data: bool
-
-
+    # ── LLM tracking fields (were missing — caused silent drop) ─────────
+    llm_used: bool
+    llm_reasoning: str
+ 
+ 
 EVState = EVAgentState
+ 
