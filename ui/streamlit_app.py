@@ -255,25 +255,40 @@ def render_forecast_section(result: dict[str, Any]) -> None:
         st.info("No congestion hotspots were identified.")
 
 
-def render_reasoning_section(result: dict[str, Any]) -> None:
+def render_reasoning_section(result: dict[str, Any]):
+
     st.markdown("## 🧠 Reasoning & LLM Insight")
 
-    llm_used = result.get("llm_used", False)
-    if llm_used:
-        st.success("AI reasoning enabled: Groq LLM was used in the planning step.")
-    else:
-        st.warning("LLM fallback used: the app relied on rule-based reasoning for this run.")
+    # 🔥 DEBUG (remove later)
+    st.write("DEBUG llm_used:", result.get("llm_used"))
+    st.write("DEBUG llm_reasoning length:", len(result.get("llm_reasoning", "")))
 
-    reasoning = result.get("reasoning", [])
-    for item in reasoning:
-        if "LLM Insight" in item:
-            st.markdown("### 🤖 AI Insight")
-            st.info(item)
-        else:
+    llm_text = result.get("llm_reasoning", "").strip()
+
+    # fallback extraction (safety)
+    if not llm_text:
+        for item in result.get("reasoning", []):
+            if isinstance(item, str) and item.startswith("LLM Insight:"):
+                llm_text = item.split("LLM Insight:", 1)[1].strip()
+                break
+
+    # ✅ SINGLE SOURCE OF TRUTH
+    llm_used = bool(llm_text)
+
+    if llm_used:
+        st.success("✅ LLM-enhanced reasoning used (Groq working)")
+    else:
+        st.warning("⚠️ Rule-based reasoning used")
+
+    st.markdown("### 📊 Decision Logic")
+
+    for item in result.get("reasoning", []):
+        if not str(item).startswith("LLM Insight:"):
             st.write("•", item)
 
-    if result.get("rag_reason"):
-        st.caption(f"RAG note: {result.get('rag_reason')}")
+    if llm_text:
+        st.markdown("### 🤖 AI Insight")
+        st.info(llm_text)
 
 
 def render_plan_section(result: dict[str, Any]) -> None:
