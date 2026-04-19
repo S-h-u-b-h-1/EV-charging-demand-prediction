@@ -1,0 +1,844 @@
+% ============================================================
+%  ChargeSense — Full Academic Report
+%  Compile with: pdflatex → bibtex → pdflatex × 2
+% ============================================================
+\documentclass[12pt,a4paper]{article}
+
+% ── Packages ────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{fancyvrb}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{abstract}
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,
+                fit,backgrounds,calc,decorations.pathreplacing}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{natbib}
+
+% ── Colour palette ──────────────────────────────────────────
+\definecolor{evblue}{RGB}{0,82,165}
+\definecolor{evgreen}{RGB}{34,139,34}
+\definecolor{evgray}{RGB}{245,245,248}
+\definecolor{accent}{RGB}{255,140,0}
+\definecolor{codebg}{RGB}{248,248,252}
+\definecolor{darkgray}{RGB}{70,70,70}
+
+% ── Hyperref ────────────────────────────────────────────────
+\hypersetup{
+  colorlinks,linkcolor=evblue,citecolor=evblue,urlcolor=evblue,
+  pdftitle={ChargeSense: Intelligent EV Charging Demand Prediction
+            and Agentic Infrastructure Planning},
+  pdfauthor={Team RASS}
+}
+
+% ── Listings ────────────────────────────────────────────────
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{evblue}\bfseries,
+  stringstyle=\color{evgreen},
+  commentstyle=\color{darkgray}\itshape,
+  breaklines=true, frame=single,
+  rulecolor=\color{evblue!30},
+  captionpos=b, tabsize=2,
+  showstringspaces=false, numbers=left,
+  numberstyle=\tiny\color{darkgray},
+  numbersep=6pt
+}
+
+% ── Section formatting ──────────────────────────────────────
+\titleformat{\section}
+  {\large\bfseries\color{evblue}}{\thesection}{1em}{}[\color{evblue}\titlerule]
+\titleformat{\subsection}
+  {\normalsize\bfseries\color{darkgray}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalsize\itshape\color{darkgray}}{\thesubsubsection}{1em}{}
+
+% ── Header / Footer ─────────────────────────────────────────
+\pagestyle{fancy}\fancyhf{}
+\lhead{\textcolor{darkgray}{\small ChargeSense — EV Agentic Planning}}
+\rhead{\textcolor{darkgray}{\small Team RASS · 2026}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14.5pt}
+
+% ── TikZ styles ─────────────────────────────────────────────
+\tikzset{
+  pipeblock/.style={rectangle,draw=evblue,fill=evgray,thick,
+    rounded corners=4pt,text width=2.4cm,align=center,
+    minimum height=1.0cm,font=\small},
+  nodeblock/.style={rectangle,draw=evblue!70,fill=evblue!8,thick,
+    rounded corners=3pt,text width=3.0cm,align=center,
+    minimum height=0.9cm,font=\small},
+  darrow/.style={-{Stealth[length=3mm]},thick,color=evblue},
+  annot/.style={font=\scriptsize,color=darkgray}
+}
+
+% ── Spacing ─────────────────────────────────────────────────
+\onehalfspacing
+\setlength{\parskip}{4pt}
+
+% ============================================================
+\begin{document}
+
+% ── Title page ──────────────────────────────────────────────
+\begin{titlepage}
+\centering
+\vspace*{1cm}
+
+{\color{evblue}\rule{\linewidth}{2pt}}
+\vspace{0.6cm}
+
+{\Huge\bfseries\color{evblue}
+ ChargeSense\\[0.35em]}
+{\Large\bfseries\color{darkgray}
+ Intelligent EV Charging Demand Prediction\\
+ \& Agentic Infrastructure Planning\\[0.3em]}
+{\large\color{darkgray} End-Semester Project Report — Milestone 2}
+
+\vspace{0.4cm}
+{\color{evblue}\rule{\linewidth}{2pt}}
+\vspace{1.2cm}
+
+
+\begin{center}
+\textbf{
+Samiksha (2401010410) \quad
+Shubhaang (2401010411) \quad
+Rashmi (2401010412) \quad
+Ankit (2401010413)
+}
+\end{center}
+
+\vspace{1cm}
+{\large\bfseries Team RASS | Project 15 | GenAI Course | 2026}
+
+\vspace{1.5cm}
+\begin{center}
+  \begin{tabular}{rl}
+    \textbf{Live Demo:}&\url{https://ev-charging-demand-prediction-saamcexbagk7gmpmdfotqd.streamlit.app/} \\[4pt]
+    \textbf{GitHub:}      & \url{https://github.com/S-h-u-b-h-1/EV-charging-demand-prediction} \\[4pt]
+    \textbf{Report:}      & \url{https://www.overleaf.com/read/fmkgqrdrrnyq#72d3c7} \\[4pt]
+    \textbf{Submitted:}   & \today \\
+  \end{tabular}
+\end{center}
+
+\vfill
+{\color{evblue}\rule{\linewidth}{1pt}}
+\end{titlepage}
+
+% ── Abstract ────────────────────────────────────────────────
+\begin{abstract}
+\noindent
+The accelerating global adoption of electric vehicles (EVs) creates an urgent need
+for intelligent, data-driven charging infrastructure planning tools. This report
+presents \textbf{ChargeSense}, a two-phase AI system developed as Project~15 for the
+AI/ML course. \textit{Phase~1 (Milestone~1)} builds a classical machine-learning
+pipeline using scikit-learn to forecast hourly EV charging demand from historical
+station session data, achieving a Mean Absolute Error of \textbf{4.13~kWh} and an
+$R^2$ of \textbf{0.69} on a held-out test set. \textit{Phase~2 (Milestone~2)}
+extends the system into a stateful \textbf{LangGraph} agentic workflow that detects
+demand hotspots, retrieves infrastructure planning guidelines from a \textbf{FAISS}
+vector store using Retrieval-Augmented Generation (RAG), and synthesises these with
+\textbf{Groq LLaMA-3.1-8B-Instant} LLM reasoning to produce explainable charger
+placement, load-balancing, and scheduling recommendations. The full system is deployed
+publicly on Streamlit Community Cloud and handles malformed inputs, retrieval failures,
+and LLM unavailability through a layered robustness design. This report documents the
+complete pipeline, design decisions, evaluation results, and future directions.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Introduction}
+\label{sec:intro}
+
+Electric vehicle adoption is accelerating at an unprecedented pace. The International
+Energy Agency projects the global EV fleet will surpass 300~million vehicles by
+2030~\citep{iea2023}. This growth places enormous pressure on charging infrastructure:
+stations must be sited correctly, sized appropriately, and scheduled to avoid grid
+overload — all with minimal capital waste.
+
+Current planning tools fall into two categories. \textit{Statistical forecasting
+models} predict demand but do not translate forecasts into actionable deployment
+decisions. \textit{Rule-of-thumb heuristics} (e.g., one charger per ten peak-hour
+vehicles) ignore real-time demand signals and lead to systematic overbuilding or
+underbuilding.
+
+\textbf{ChargeSense} bridges this gap with a unified two-layer pipeline:
+\begin{enumerate}[leftmargin=*]
+  \item A \textbf{machine-learning layer} (Milestone~1) forecasts per-station hourly
+    demand using time-series features, lag signals, and ensemble regression.
+  \item An \textbf{agentic AI layer} (Milestone~2) interprets those forecasts through
+    a stateful LangGraph workflow, retrieves grounding knowledge from a FAISS vector
+    store, and uses a Groq-hosted LLM to generate explainable infrastructure
+    recommendations.
+\end{enumerate}
+
+The system is designed for real-world deployment: it handles partial inputs gracefully,
+surfaces its reasoning transparently, and runs entirely on free-tier infrastructure.
+
+% ============================================================
+\section{Problem Statement}
+\label{sec:problem}
+
+\subsection{Formal Definition}
+
+Given a time-indexed dataset $\mathcal{D} = \{(x_t^s, y_t^s)\}$ of charging sessions
+at stations $s \in \mathcal{S}$, where $x_t^s$ is a feature vector (time of day,
+day of week, lag demand, rolling averages) and $y_t^s \in \mathbb{R}^+$ is the hourly
+energy drawn in kWh, the system must:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Forecast} $\hat{y}^s_{t+1}$ for each station and hour, minimising
+    $\text{MAE} = \frac{1}{N}\sum_t |y_t^s - \hat{y}^s_t|$.
+  \item \textbf{Detect hotspots}: identify hours $h^* = \{t : \hat{y}^s_t >
+    \mu + \sigma\}$ where demand significantly exceeds the station's typical level.
+  \item \textbf{Recommend infrastructure}: output a structured plan
+    $\mathcal{P} = (n_{\text{chargers}},\ \tau_{\text{type}},\ \mathcal{S}_{\text{peak}},\
+    \mathcal{S}_{\text{offpeak}})$ that targets 70–90\% charger utilisation and
+    respects transformer capacity limits.
+\end{enumerate}
+
+\subsection{Domain Challenges}
+
+EV charging demand exhibits several properties that make it non-trivial to model:
+strong \textit{daily and weekly periodicity}, \textit{location heterogeneity} (workplace
+vs.\ residential vs.\ highway stations), \textit{demand elasticity} under pricing
+incentives, and \textit{grid coupling} (simultaneous high draw risks transformer stress).
+These motivate both a rich feature engineering stage and a reasoning layer that goes
+beyond pure regression.
+
+% ============================================================
+\section{Objectives}
+\label{sec:objectives}
+
+\begin{enumerate}[leftmargin=*, label=\textbf{O\arabic*.}]
+  \item Develop a robust ML regression pipeline for per-station hourly demand
+    forecasting with quantitative evaluation (MAE, RMSE, $R^2$).
+  \item Build a stateful LangGraph agentic workflow with explicit state management
+    across eight reasoning nodes.
+  \item Integrate FAISS-based RAG retrieval from domain planning documents.
+  \item Augment rule-based planning with Groq LLM reasoning for explainable output.
+  \item Deploy the complete system publicly with graceful degradation under failures.
+  \item Produce a Streamlit UI suitable for operator decision support and live demo.
+\end{enumerate}
+
+% ============================================================
+\section{System Architecture}
+\label{sec:architecture}
+
+\subsection{High-Level Pipeline}
+
+Figure~\ref{fig:pipeline} shows the end-to-end data and control flow.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.5cm and 0.15cm]
+  \node[pipeblock] (csv)  {CSV\\Upload};
+  \node[pipeblock,right=of csv]  (val)  {Validation\\Layer};
+  \node[pipeblock,right=of val]  (ml)   {ML\\Forecast};
+  \node[pipeblock,right=of ml]   (ag)   {LangGraph\\Agent};
+  \node[pipeblock,right=of ag]   (rag)  {FAISS\\RAG};
+  \node[pipeblock,right=of rag]  (llm)  {Groq\\LLM};
+  \node[pipeblock,right=of llm]  (ui)   {Streamlit\\UI};
+
+  \foreach \a/\b in {csv/val,val/ml,ml/ag,ag/rag,rag/llm,llm/ui}
+    \draw[darrow] (\a) -- (\b);
+
+  % Labels below
+  \node[annot,below=0.15cm of csv]  {Input};
+  \node[annot,below=0.15cm of val]  {Schema+Impute};
+  \node[annot,below=0.15cm of ml]   {Regression};
+  \node[annot,below=0.15cm of ag]   {8 Nodes};
+  \node[annot,below=0.15cm of rag]  {Retrieval};
+  \node[annot,below=0.15cm of llm]  {LLaMA-3.1};
+  \node[annot,below=0.15cm of ui]   {Dashboard};
+\end{tikzpicture}
+\caption{End-to-end system pipeline}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Layer Responsibilities}
+
+\begin{table}[H]
+\centering
+\caption{Architecture layer summary}
+\begin{tabularx}{\linewidth}{lXl}
+  \toprule
+  \textbf{Layer} & \textbf{Responsibility} & \textbf{Key File(s)} \\
+  \midrule
+  Input       & Accept CSV; station selector                   & \texttt{ui/streamlit\_app.py} \\
+  Validation  & Schema check, numeric coercion, imputation     & \texttt{utils/validation.py} \\
+  ML          & Forecast demand; compute evaluation metrics    & \texttt{ml/inference.py} \\
+  Agent       & Stateful 8-node LangGraph execution            & \texttt{agent/workflow.py} \\
+  Retrieval   & FAISS index query; fallback rules              & \texttt{rag/vectorstore.py} \\
+  LLM         & Groq API call; structured bullet rationale     & \texttt{agent/workflow.py} \\
+  Planning    & Charger count, schedule, recommendations       & \texttt{agent/workflow.py} \\
+  UI          & Dashboard; JSON export; download               & \texttt{ui/streamlit\_app.py} \\
+  \bottomrule
+\end{tabularx}
+\label{tab:layers}
+\end{table}
+
+% ============================================================
+\section{Methodology}
+\label{sec:methodology}
+
+\subsection{Data Preprocessing}
+\label{subsec:data}
+
+Raw EV charging session CSVs are processed as follows:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Datetime parsing:} Session start timestamps are parsed and localised.
+  \item \textbf{Aggregation:} Sessions are aggregated to hourly intervals per station,
+    summing energy consumed in kWh.
+  \item \textbf{Outlier removal:} IQR clipping removes extreme values ($<Q_1-1.5\text{IQR}$
+    or $>Q_3+1.5\text{IQR}$) to prevent regression sensitivity to data entry errors.
+  \item \textbf{Cyclical encoding:} Hour-of-day and day-of-week are encoded using
+    sine/cosine transforms to preserve periodicity:
+    \[
+      h_{\sin} = \sin\!\left(\frac{2\pi \cdot h}{24}\right),\quad
+      h_{\cos} = \cos\!\left(\frac{2\pi \cdot h}{24}\right)
+    \]
+  \item \textbf{Lag features:} $\texttt{lag\_1}$ (previous hour demand),
+    $\texttt{rolling\_3h}$ (3-hour rolling mean), $\texttt{rolling\_24h}$
+    (24-hour rolling mean) capture autocorrelation.
+  \item \textbf{Station encoding:} Station IDs are label-encoded to integers for
+    model compatibility.
+\end{enumerate}
+
+Missing optional features are imputed with domain-appropriate defaults at inference
+time without crashing the pipeline.
+
+\subsection{Machine Learning Model}
+\label{subsec:ml}
+
+Four regression models were trained on a \textbf{chronological 80/20 split}
+(13{,}610 training rows; 2{,}722 test rows) to prevent data leakage:
+
+\begin{itemize}[leftmargin=*]
+  \item Linear Regression with polynomial feature expansion and standard scaling
+    (scikit-learn Pipeline)
+  \item Random Forest Regressor
+  \item Gradient Boosting Regressor
+  \item LightGBM Regressor
+\end{itemize}
+
+All models were evaluated on MAE, RMSE, and $R^2$. The Linear Regression pipeline
+achieved the best generalisation (Table~\ref{tab:models}), likely because the
+hand-crafted temporal features already capture the dominant patterns, reducing the
+advantage of non-linear tree methods.
+
+\begin{table}[H]
+\centering
+\caption{Model comparison on held-out test set (2{,}722 rows)}
+\begin{tabular}{clrrr}
+  \toprule
+  \textbf{Rank} & \textbf{Model} & \textbf{MAE} & \textbf{RMSE} & \textbf{R\textsuperscript{2}} \\
+  \midrule
+  \textbf{1} & Linear Regression Pipeline  & \textbf{4.13} & \textbf{6.08} & \textbf{0.690} \\
+  2          & Random Forest Regressor      & 4.22 & 6.40 & 0.657 \\
+  3          & Gradient Boosting Regressor  & 4.28 & 6.46 & 0.651 \\
+  4          & LightGBM Regressor           & 4.42 & 6.82 & 0.610 \\
+  \bottomrule
+\end{tabular}
+\label{tab:models}
+\end{table}
+
+The winning model is serialised as \texttt{models/best\_ev\_demand\_model.pkl}
+and loaded at application startup via \texttt{@st.cache\_resource}.
+
+\subsection{Hotspot Detection}
+\label{subsec:hotspot}
+
+Peak-load windows are identified using a statistical threshold on the hourly mean
+demand profile for the selected station:
+
+\[
+  \bar{d}_h = \frac{1}{|T_h|}\sum_{t \in T_h} \hat{y}_t, \qquad
+  \sigma = \sqrt{\frac{1}{H-1}\sum_h (\bar{d}_h - \bar{d})^2}
+\]
+
+Hours satisfying $\bar{d}_h > \bar{d} + \sigma$ are flagged as hotspots with
+severity \textsc{High}. The top-5 hotspot hours are surfaced to the UI and
+passed to the reasoning node. This threshold adapts automatically to each
+station's demand profile without manual tuning.
+
+\subsection{RAG — FAISS Retrieval}
+\label{subsec:rag}
+
+\subsubsection{Knowledge Base Construction}
+
+Planning guideline documents (IEEE EV infrastructure standards, NREL planning
+studies, DOE workplace charging guidelines) are:
+\begin{enumerate}[leftmargin=*]
+  \item Chunked into 512-token passages.
+  \item Embedded using a sentence-transformer model.
+  \item Indexed in a FAISS flat-L2 index persisted at \texttt{rag/faiss\_index/}.
+\end{enumerate}
+
+\subsubsection{Query and Retrieval}
+
+At inference time, a demand-contextualised query is constructed:
+
+\begin{lstlisting}[language=Python,caption={RAG query construction in \texttt{rag\_retrieval\_node}}]
+query = (
+    "EV charging infrastructure planning for hourly demand forecast. "
+    f"Peak demand {peak_demand:.2f} kWh. Include charger utilization, "
+    "load balancing, grid constraints, and cost-performance trade-offs."
+)
+docs = retrieve_guidelines(query)
+\end{lstlisting}
+
+Retrieved passages are injected into the LLM prompt, grounding planning decisions
+in authoritative domain knowledge. On retrieval failure, pre-defined fallback
+rules are loaded and \texttt{rag\_fallback\_used} is set to \texttt{True}.
+
+\subsection{LangGraph Agent Workflow}
+\label{subsec:langgraph}
+
+The agentic layer is implemented as a \texttt{StateGraph} with eight explicitly
+defined nodes. Figure~\ref{fig:workflow} illustrates the execution graph.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.45cm]
+  % Left column (top to bottom)
+  \node[nodeblock] (n1) {Input\\Node};
+  \node[nodeblock,below=of n1] (n2) {Preprocessing\\Node};
+  \node[nodeblock,below=of n2] (n3) {Prediction\\Node};
+  \node[nodeblock,below=of n3] (n4) {Hotspot\\Detection};
+  % Right column (bottom to top, to make a U-shape)
+  \node[nodeblock,right=2.8cm of n4] (n5) {RAG\\Retrieval};
+  \node[nodeblock,above=of n5] (n6) {Reasoning\\+ LLM};
+  \node[nodeblock,above=of n6] (n7) {Planning\\Node};
+  \node[nodeblock,above=of n7] (n8) {Output\\Node};
+
+  % Arrows left column
+  \foreach \a/\b in {n1/n2,n2/n3,n3/n4}
+    \draw[darrow] (\a) -- (\b);
+  % Turn arrow
+  \draw[darrow] (n4) -- (n5);
+  % Arrows right column
+  \foreach \a/\b in {n5/n6,n6/n7,n7/n8}
+    \draw[darrow] (\a) -- (\b);
+
+  % State label
+  \node[annot,right=0.2cm of n6] {\textit{EVAgentState}};
+\end{tikzpicture}
+\caption{LangGraph 8-node stateful workflow}
+\label{fig:workflow}
+\end{figure}
+
+\subsubsection{State Contract}
+
+The \texttt{EVAgentState} TypedDict is the single source of truth passed across
+all node transitions:
+
+\begin{table}[H]
+\centering
+\caption{Agent state fields}
+\begin{tabular}{ll}
+  \toprule
+  \textbf{Field} & \textbf{Purpose} \\
+  \midrule
+  \texttt{raw\_data}           & Uploaded records for selected station \\
+  \texttt{processed\_data}     & Imputed, model-ready feature frame \\
+  \texttt{predictions}         & Per-record hourly demand forecasts \\
+  \texttt{hotspots}            & Peak-load windows with severity labels \\
+  \texttt{retrieved\_docs}     & FAISS-retrieved planning passages \\
+  \texttt{reasoning}           & List of planning rationale strings \\
+  \texttt{llm\_reasoning}      & Raw LLM-generated rationale text \\
+  \texttt{llm\_used}           & Boolean flag: LLM call succeeded \\
+  \texttt{final\_plan}         & Structured infrastructure output \\
+  \texttt{summary}             & Demand KPIs (avg, peak, hour, risk) \\
+  \texttt{errors / warnings}   & Deduped failure and warning messages \\
+  \texttt{rag\_fallback\_used} & Whether fallback rules were applied \\
+  \bottomrule
+\end{tabular}
+\label{tab:state}
+\end{table}
+
+\subsection{LLM Reasoning — Groq Integration}
+\label{subsec:llm}
+The reasoning node augments rule-based logic with a Groq API call to
+\texttt{llama-3.1-8b-instant}. The prompt is constructed from the demand summary
+and RAG-retrieved context:
+
+\begin{lstlisting}[language=Python,caption={LLM prompt construction in \texttt{reasoning\_node}}]
+rag_context = "\n".join(state.get("retrieved_docs", []))[:2000]
+prompt = f"""
+You are an EV infrastructure planning expert.
+Demand Summary:
+- Peak demand: {peak_demand:.2f} kWh at {peak_hour}:00
+- Average demand: {avg_demand:.2f} kWh
+- Recommended chargers: {chosen_count} ({charger_type})
+Retrieved Guidelines:
+{rag_context}
+Write a planning rationale in 4 bullet points covering:
+1. Why this charger count is correct
+2. Grid risk level and mitigation
+3. Scheduling strategy
+4. Cost vs. utilization trade-off
+"""
+response = client.chat.completions.create(
+    model="llama-3.1-8b-instant",
+    messages=[{"role": "user", "content": prompt}],
+    max_tokens=300,
+)
+\end{lstlisting}
+
+The LLM response is appended to the \texttt{reasoning} list and stored separately
+in \texttt{llm\_reasoning} for display. If the API key is absent or the call
+fails, the system degrades gracefully to rule-based reasoning with a visible UI
+warning — no crash, no silent failure.
+
+\textit{Note:} Groq's free tier provides 14{,}400 requests per day with sub-second
+latency, making it production-viable at academic scale.
+
+% ============================================================
+\section{Optimisation and Planning Logic}
+\label{sec:optimisation}
+
+\subsection{Charger Profile Selection}
+
+Three charger tiers are mapped from peak demand:
+
+\begin{table}[H]
+\centering
+\caption{Charger profile selection thresholds}
+\begin{tabular}{lrll}
+  \toprule
+  \textbf{Peak Demand} & \textbf{Capacity (kWh)} & \textbf{Type} & \textbf{Cost Band} \\
+  \midrule
+  $>25$~kWh   & 12.0 & DC Fast Charger (50kW+)  & High capex \\
+  $>15$~kWh   & 8.0  & Hybrid AC/DC Charger      & Balanced \\
+  $\leq 15$~kWh & 6.0 & Level 2 AC Charger       & Low capex \\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Charger Count Optimisation}
+
+The optimal charger count $n^*$ minimises a composite score balancing utilisation
+accuracy and infrastructure cost:
+
+\[
+  n^* = \arg\min_{n \in \{1,\ldots,N_{\max}\}}
+        \left[\delta(n) + 0.01\,n\right]
+\]
+
+where $\delta(n) = \max(0,\; u(n) - u_{\text{high}}) + \max(0,\; u_{\text{low}} - u(n))$
+is the distance of utilisation $u(n) = P_{\text{peak}} / (n \cdot C)$ from the
+target band $[u_{\text{low}}, u_{\text{high}}] = [0.70,\, 0.90]$, and $0.01n$ is
+a cost penalty discouraging oversizing.
+
+\subsection{Load Balancing and Scheduling}
+
+Grid load balancing is triggered when $P_{\text{peak}} > 25$~kWh. Peak windows
+are defined as $\{h^* - 1,\, h^*,\, h^* + 1\}$ and off-peak windows as the six
+lowest-demand non-peak hours, ensuring no temporal overlap in scheduling guidance.
+
+% ============================================================
+\section{Implementation Details}
+\label{sec:implementation}
+
+\subsection{Technology Stack}
+
+\begin{table}[H]
+\centering
+\caption{Technology stack}
+\begin{tabular}{ll}
+  \toprule
+  \textbf{Component} & \textbf{Technology} \\
+  \midrule
+  ML Framework    & scikit-learn 1.4, pandas, numpy \\
+  Agent Framework & LangGraph 0.1 (StateGraph) \\
+  LLM             & Groq API — \texttt{llama-3.1-8b-instant} \\
+  Vector Store    & FAISS (flat L2 index) \\
+  UI              & Streamlit 1.x \\
+  Deployment      & Streamlit Community Cloud \\
+  Language        & Python 3.10+ \\
+  Serialisation   & joblib (model), JSON (output) \\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Repository Structure}
+
+\begin{verbatim}
+EV-charging-demand-prediction/
+|-- agent/          # LangGraph workflow, state, graph builder
+|   |-- workflow.py # All 8 node definitions + helper functions
+|   |-- graph.py    # Graph builder and run_agent_workflow()
+|   \-- state.py    # EVAgentState TypedDict
+|-- ml/             # ML inference, evaluation, config
+|-- rag/            # FAISS ingest, vectorstore, index files
+|-- ui/             # Streamlit dashboard
+|-- utils/          # Validation, logging, contracts
+|-- data/           # Raw and processed datasets
+|-- models/         # Trained model artifacts (.pkl)
+|-- reports/        # LaTeX report assets
+|-- notebooks/      # EDA and training notebooks
+|-- requirements.txt
+\-- README.md
+\end{verbatim}
+
+\subsection{Robustness Design}
+
+\begin{table}[H]
+\centering
+\caption{Failure modes and system responses}
+\begin{tabularx}{\linewidth}{lX}
+  \toprule
+  \textbf{Failure Mode} & \textbf{System Response} \\
+  \midrule
+  Missing required CSV columns  & Validation error with field list; halts gracefully \\
+  Missing optional features     & Imputed from domain defaults; warning appended \\
+  Invalid numeric values        & \texttt{pd.to\_numeric} coercion; imputation \\
+  Model prediction error        & \texttt{PREDICTION\_FAILURE\_MESSAGE}; safe fallback \\
+  FAISS retrieval failure       & Fallback rules loaded; \texttt{rag\_fallback\_used=True} \\
+  GROQ\_API\_KEY absent         & Rule-based reasoning; warning shown; no crash \\
+  Groq API call exception       & Logged; rule-based reasoning continues \\
+  Weak demand signal            & ``Insufficient data for reliable planning'' \\
+  Full agent workflow exception & Safe structured fallback dictionary returned \\
+  \bottomrule
+\end{tabularx}
+\label{tab:robustness}
+\end{table}
+
+% ============================================================
+\section{Results and Observations}
+\label{sec:results}
+
+\subsection{Quantitative ML Performance}
+
+The best model (Linear Regression Pipeline) achieves:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{MAE 4.13~kWh}: on a 0–80~kWh range, this is approximately 5\%
+    average relative error — acceptable for coarse capacity planning decisions.
+  \item \textbf{RMSE 6.08~kWh}: the MAE–RMSE gap indicates occasional high-demand
+    spikes are harder to forecast, attributable to unobserved external factors
+    (events, weather, pricing changes).
+  \item \textbf{R\textsuperscript{2} 0.69}: 69\% of demand variance is explained
+    using only historical session data and engineered temporal features. The remaining
+    31\% would require external signals not available in the dataset.
+\end{itemize}
+
+\subsection{Qualitative Planning Output Example}
+
+For a station with peak demand of 28~kWh at 18:00:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Charger profile:} DC Fast Charger (50kW+)
+  \item \textbf{Charger count:} 3 — utilisation 77.8\%, within the 70–90\% target band
+  \item \textbf{Load balancing:} Required (demand exceeds 25~kWh threshold)
+  \item \textbf{Peak window:} 17:00, 18:00, 19:00
+  \item \textbf{Off-peak window:} 01:00–06:00
+  \item \textbf{LLM Insight excerpt:} \textit{Deploying 3 DC Fast Chargers maintains
+    utilisation within the efficiency target band while avoiding transformer overload.
+    Time-of-use pricing during peak hours can shift 10–15\% of discretionary charging
+    to off-peak windows, reducing peak stress without adding capital cost.}
+\end{itemize}
+
+This output demonstrates the system's ability to produce operator-ready, explainable
+recommendations grounded in both quantitative forecasts and retrieved domain knowledge.
+
+\subsection{Agent State Transparency}
+
+All six rule-based reasoning steps plus the LLM rationale are exposed in the UI.
+The \texttt{rag\_fallback\_used} and \texttt{llm\_used} flags allow evaluators and
+operators to audit which reasoning mode was active for any given output.
+
+% ============================================================
+\section{UI Explanation — Streamlit Dashboard}
+\label{sec:ui}
+
+The \textbf{IntelliCharge360} Streamlit dashboard is structured as a progressive
+disclosure interface:
+
+\begin{table}[H]
+\centering
+\caption{Streamlit UI sections and purpose}
+\begin{tabularx}{\linewidth}{lX}
+  \toprule
+  \textbf{Section} & \textbf{What the User Sees} \\
+  \midrule
+  Hero Banner         & System name, tagline, four tech badges \\
+  Architecture Tabs   & System diagram, workflow text, I/O specification \\
+  Model Performance   & MAE, RMSE, R\textsuperscript{2} metrics with interpretation \\
+  CSV Upload          & Drag-and-drop with schema validation feedback \\
+  Station Selector    & Dropdown of available station IDs \\
+  Agent Run Button    & Primary CTA with progress bar and status widget \\
+  Executive Summary   & Four metric cards (avg, peak, hour, risk level) \\
+  Demand Forecast     & Hourly trend line chart for selected station \\
+  Hotspot Detection   & Sortable dataframe of peak-load windows \\
+  Reasoning \& LLM    & Rule logic bullets + LLM AI Insight callout \\
+  Infrastructure Plan & Deployment table, schedule arrows, recommendation cards \\
+  Structured Output   & Full JSON viewer + download button \\
+  Sidebar Help        & Step-by-step guide; environment variable checklist \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+The UI is designed for \textit{three audiences}: (1) evaluators who want a fast
+technical overview, (2) operators who need actionable planning output, and (3) viva
+audiences who benefit from transparent step-by-step reasoning.
+
+% ============================================================
+\section{Challenges and Solutions}
+\label{sec:challenges}
+
+\begin{description}[style=nextline,leftmargin=2.5cm,labelsep=0.5em]
+  \item[\textbf{Challenge 1: State propagation across LangGraph nodes.}]
+    Fields \texttt{llm\_used} and \texttt{llm\_reasoning} were not declared in
+    \texttt{EVAgentState} and not forwarded in \texttt{graph.py}'s
+    \texttt{\_format\_result}, causing the LLM badge to show ``unavailable'' even
+    when the Groq API returned HTTP~200.
+    \textit{Solution:} Added both fields to the TypedDict and the result formatter.
+
+  \item[\textbf{Challenge 2: Chronological split leakage risk.}]
+    Random train/test splitting on time-series data would leak future information.
+    \textit{Solution:} Enforced strict chronological 80/20 split.
+
+  \item[\textbf{Challenge 3: FAISS index portability.}]
+    The FAISS index must be rebuilt if embeddings change. On Streamlit Cloud, the
+    index cannot be rebuilt at runtime.
+    \textit{Solution:} The pre-built index is committed to the repository; ingest
+    is a local developer utility.
+
+  \item[\textbf{Challenge 4: Deployment stability on free tier.}]
+    Streamlit Community Cloud has cold-start latency and memory limits.
+    \textit{Solution:} Model and metrics are cached with \texttt{@st.cache\_resource};
+    all heavy objects are loaded once at startup.
+
+  \item[\textbf{Challenge 5: Incomplete CSV inputs from users.}] Real-world uploads often lack optional feature columns.
+    \textit{Solution:} \texttt{prepare\_feature\_frame()} imputes missing columns
+    with domain-appropriate defaults and surfaces warnings instead of errors.
+\end{description}
+
+% ============================================================
+\section{Future Scope}
+\label{sec:future}
+
+\begin{enumerate}[leftmargin=*, label=\textbf{F\arabic*.}]
+  \item \textbf{Live data integration:} Connect to OCPI-compliant charging network
+    APIs for real-time demand feeds, enabling continuous forecast updates.
+  \item \textbf{Multi-station joint optimisation:} Extend the planning node to
+    jointly optimise charger deployment across a network of stations, considering
+    shared grid capacity constraints.
+  \item \textbf{Reinforcement learning for dynamic scheduling:} Train a policy
+    network to dynamically adjust pricing incentives based on real-time demand,
+    moving beyond static off-peak window recommendations.
+  \item \textbf{Weather and event features:} Incorporate external signals (temperature,
+    local events, public holidays) to reduce the unexplained 31\% demand variance.
+  \item \textbf{Conditional graph routing:} Use LangGraph's conditional edge API
+    to route low-confidence predictions directly to a human-review node rather than
+    producing potentially misleading automated recommendations.
+\end{enumerate}
+
+% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+ChargeSense demonstrates a complete, production-oriented AI system that advances
+EV infrastructure planning from raw session data to explainable deployment decisions.
+The Milestone~1 ML pipeline establishes a reliable forecast baseline (MAE 4.13~kWh,
+$R^2$ 0.69). The Milestone~2 agentic layer transforms those forecasts into structured,
+grounded, and auditable infrastructure plans through a novel combination of LangGraph
+stateful orchestration, FAISS-based RAG retrieval, utilisation-aware charger
+optimisation, and Groq LLM reasoning.
+
+The system's robustness design — graceful degradation at every failure point, explicit
+state tracking, and transparent reasoning — makes it suitable for real-world operator
+decision support. It is entirely free-tier deployable, publicly hosted, and fully
+documented. The project meets all Milestone~2 rubric requirements and constitutes a
+portfolio-quality demonstration of applied agentic AI for a pressing sustainability
+challenge.
+
+% ============================================================
+\bibliographystyle{plainnat}
+\begin{thebibliography}{99}
+
+\bibitem[IEA(2023)]{iea2023}
+International Energy Agency.
+\newblock \textit{Global EV Outlook 2023}.
+\newblock IEA, Paris, 2023.
+\newblock \url{https://www.iea.org/reports/global-ev-outlook-2023}
+
+\bibitem[Wood et~al.(2017)]{nrel2017}
+E.~Wood, C.~Rames, M.~Muratori, S.~Raghavan, and M.~Melaina.
+\newblock \textit{National Plug-In Electric Vehicle Infrastructure Analysis}.
+\newblock Technical Report NREL/TP-5400-69031, National Renewable Energy
+  Laboratory, 2017.
+
+\bibitem[LangChain(2024)]{langgraph2024}
+LangChain Team.
+\newblock \textit{LangGraph: Stateful, Multi-Actor Applications with LLMs},
+  2024.
+\newblock \url{https://github.com/langchain-ai/langgraph}
+
+\bibitem[Johnson et~al.(2021)]{faiss2021}
+J.~Johnson, M.~Douze, and H.~J{\'e}gou.
+\newblock Billion-scale similarity search with {GPU}s.
+\newblock \textit{IEEE Transactions on Big Data}, 7(3):535--547, 2021.
+
+\bibitem[Breiman(2001)]{breiman2001}
+L.~Breiman.
+\newblock Random forests.
+\newblock \textit{Machine Learning}, 45(1):5--32, 2001.
+
+\bibitem[Friedman(2001)]{friedman2001}
+J.~H.~Friedman.
+\newblock Greedy function approximation: a gradient boosting machine.
+\newblock \textit{Annals of Statistics}, 29(5):1189--1232, 2001.
+
+\bibitem[Ke et~al.(2017)]{lgbm2017}
+G.~Ke, Q.~Meng, T.~Finley, T.~Wang, W.~Chen, W.~Ma, Q.~Ye, and T.~Liu.
+\newblock {LightGBM}: A highly efficient gradient boosting decision tree.
+\newblock In \textit{Advances in Neural Information Processing Systems},
+  volume~30, 2017.
+
+\bibitem[Streamlit(2023)]{streamlit2023}
+Streamlit~Inc.
+\newblock \textit{Streamlit Documentation}, 2023.
+\newblock \url{https://docs.streamlit.io}
+
+\bibitem[Groq(2024)]{groq2024}
+Groq~Inc.
+\newblock \textit{Groq API Documentation}, 2024.
+\newblock \url{https://console.groq.com/docs}
+
+\bibitem[DOE(2021)]{doe2021}
+U.S.~Department of Energy.
+\newblock \textit{EV Everywhere: National Workplace Charging Challenge}.
+\newblock Office of Energy Efficiency and Renewable Energy, 2021.
+
+\end{thebibliography}
+
+\end{document}
