@@ -1,791 +1,361 @@
-
 <div align="center">
 
+# ⚡ ChargeSense
 ### Intelligent EV Charging Demand Prediction & Agentic Infrastructure Planning
-[Live Demo](https://ev-charging-demand-prediction-2026.streamlit.app/#4fdf7da3) | [Project Report](https://www.overleaf.com/read/gzkncnjwyhdh#29da89) | [Requirements](requirements.txt) | [App Entry](app/streamlit_app.py)
 
-[![Milestone](https://img.shields.io/badge/Milestone-2%20%7C%20End--Sem-8E44AD?style=for-the-badge&logo=lightning&logoColor=white)](.)
-[![Agentic AI](https://img.shields.io/badge/System-Agentic%20AI-FF6F00?style=for-the-badge&logo=openai&logoColor=white)](.)
-[![RAG](https://img.shields.io/badge/RAG-Enabled-2ECC71?style=for-the-badge&logo=semanticweb&logoColor=white)](.)
-[![LangGraph](https://img.shields.io/badge/Framework-LangGraph-000000?style=for-the-badge)](.)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-FFD43B?style=for-the-badge&logo=python&logoColor=black)](.)
-[![Team](https://img.shields.io/badge/Team-RASS-00BCD4?style=for-the-badge&logo=github&logoColor=white)](.)
+*From raw session data to explainable, AI-driven deployment decisions — in one pipeline.*
 
-<br/>
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://ev-charging-demand-prediction-2026.streamlit.app)
+[![Milestone](https://img.shields.io/badge/Milestone-2%20%7C%20End--Sem-8E44AD?style=for-the-badge&logo=lightning&logoColor=white)](https://github.com/S-h-u-b-h-1/EV-charging-demand-prediction)
+[![LangGraph](https://img.shields.io/badge/Framework-LangGraph-000000?style=for-the-badge)](https://github.com/langchain-ai/langgraph)
+[![RAG](https://img.shields.io/badge/RAG-FAISS%20Enabled-2ECC71?style=for-the-badge&logo=semanticweb&logoColor=white)](https://github.com/S-h-u-b-h-1/EV-charging-demand-prediction)
+[![LLM](https://img.shields.io/badge/LLM-Groq%20%7C%20LLaMA--3.1-FF6F00?style=for-the-badge)](https://console.groq.com)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-FFD43B?style=for-the-badge&logo=python&logoColor=black)](https://python.org)
+[![Team](https://img.shields.io/badge/Team-RASS-0BCD4?style=for-the-badge&logo=github&logoColor=white)](https://github.com/S-h-u-b-h-1)
 
-> From Demand Forecasting to Autonomous EV Infrastructure Planning  
-> A full-stack Agentic AI system that predicts EV demand, detects hotspots, retrieves planning knowledge, and generates optimized infrastructure decisions.
+---
 
-<br/>
+> **ChargeSense** is a full-stack Agentic AI system that predicts EV charging demand,
+> detects congestion hotspots, retrieves infrastructure planning guidelines via RAG,
+> reasons with a Groq-hosted LLaMA-3.1 LLM, and generates optimised charger
+> placement and scheduling recommendations — all deployed publicly on Streamlit Cloud.
 
-| Rashmi | Shubhaang | Samiksha | Ankit |
-|:------:|:----------:|:--------:|:-----:|
-| Team Member | Team Member | Team Member | Team Member |
-
+[🚀 Live Demo](https://ev-charging-demand-prediction-2026.streamlit.app) &nbsp;·&nbsp;
+[📄 LaTeX Report](https://www.overleaf.com/read/gzkncnjwyhdh#29da89) &nbsp;·&nbsp;
+[🎬 Demo Video](#demo-video) &nbsp;·&nbsp;
+[📦 Requirements](requirements.txt)
 
 </div>
 
+---
 
-## Quick Navigation
+## 📋 Table of Contents
 
-- [Project Overview](#project-overview)
-- [Why This Project Matters](#why-this-project-matters)
-- [System Architecture](#system-architecture)
-- [LangGraph Agent Workflow](#langgraph-agent-workflow)
-- [Input and Output Specification](#input-and-output-specification)
-- [Repository Structure](#repository-structure)
-- [Model Performance](#model-performance)
-- [Optimization and Planning Logic](#optimization-and-planning-logic)
-- [RAG and Robustness Design](#rag-and-robustness-design)
-- [UI and Demo Flow](#ui-and-demo-flow)
-- [Installation and Run Instructions](#installation-and-run-instructions)
-- [Deployment](#deployment)
-- [Report and Video](#report-and-video)
-- [Rubric Alignment](#rubric-alignment)
+- [Why ChargeSense?](#-why-chargesense)
+- [Features](#-features)
+- [System Architecture](#-system-architecture)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Installation](#-installation)
+- [Environment Variables](#-environment-variables)
+- [Running the App](#-running-the-app)
+- [Input / Output Specification](#-input--output-specification)
+- [Model Performance](#-model-performance)
+- [Optimisation Logic](#-optimisation-logic)
+- [Robustness Design](#-robustness-design)
+- [Demo Video](#-demo-video)
+- [Team](#-team)
+- [Future Improvements](#-future-improvements)
 
-## Project Overview
+---
 
-This project addresses EV charging infrastructure planning as a two-layer AI system:
+## 🌍 Why ChargeSense?
 
-1. A machine learning layer forecasts hourly charging demand from historical station usage.
-2. A stateful LangGraph agent layer interprets forecast patterns, retrieves planning guidelines through RAG, and generates explainable infrastructure and scheduling recommendations.
+The global EV fleet is projected to exceed **300 million vehicles by 2030**. Infrastructure
+planners face a hard problem every day:
 
-The current repository is the end-semester agentic version of the project. It extends the original forecasting pipeline into a production-oriented planning assistant with:
+| Question | Old Answer | ChargeSense Answer |
+|---|---|---|
+| How many chargers do I need? | Rule of thumb: peak ÷ 10 | Utilisation-optimised count (70–90% band) |
+| Which stations need attention? | Manual inspection | Automated hotspot detection (μ + σ threshold) |
+| When will the grid be stressed? | Guesswork | LLM + RAG-grounded load balancing alert |
+| What should I do about it? | Consultant report | Structured deployment plan in seconds |
 
-- demand prediction
-- hotspot detection
-- LangGraph state transitions
-- FAISS-based retrieval
-- optimization-aware reasoning
-- robust failure handling
-- Streamlit-based decision support UI
+---
 
-## Why This Project Matters
+## ✨ Features
 
-EV infrastructure planning is not only a forecasting problem. Operators also need to answer questions such as:
+- **📈 ML Demand Forecasting** — scikit-learn pipeline with cyclical encoding, lag features, and 4-model comparison. Best model: Linear Regression (MAE 4.13 kWh, R² 0.69).
+- **🧠 LangGraph Agentic Workflow** — 8-node stateful graph: Input → Preprocessing → Prediction → Hotspot Detection → RAG Retrieval → Reasoning → Planning → Output.
+- **📚 FAISS-based RAG** — planning guidelines from IEEE, NREL, and DOE retrieved and injected into LLM context at inference time.
+- **🤖 Groq LLM Reasoning** — LLaMA-3.1-8b-instant generates 4-point explainable planning rationale grounded in retrieved documents.
+- **🛡️ Layered Robustness** — graceful degradation at every failure point: missing columns, retrieval failure, LLM unavailability. No silent crashes.
+- **📊 Streamlit Dashboard** — professional UI with metrics, forecast charts, hotspot tables, reasoning display, and JSON export.
+- **☁️ Free-tier Deployed** — Streamlit Community Cloud. No paid API required for the default flow; Groq free tier handles LLM calls.
 
-- Which stations are likely to face peak congestion?
-- How many chargers should be deployed without overbuilding?
-- When is load balancing required to avoid transformer stress?
-- Which hours should be incentivized as off-peak windows?
+---
 
-This system is designed to move from raw usage analytics to explainable planning recommendations that are useful for real-world grid and station operations.
+## 🏗️ System Architecture
 
-## System Architecture
-
-The end-to-end system combines ML forecasting, agentic reasoning, retrieval, and UI delivery.
-
-```mermaid
-flowchart LR
-    A["CSV Input"] --> B["Preprocessing Layer"]
-    B --> C["ML Forecasting Model"]
-    C --> D["Demand Forecast"]
-    D --> E["LangGraph Agent"]
-    E --> F["RAG Retrieval (FAISS)"]
-    F --> G["Planning Engine"]
-    G --> H["Streamlit UI"]
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         ChargeSense Pipeline                            │
+│                                                                         │
+│  CSV Upload ──► Validation ──► ML Forecast ──► LangGraph Agent          │
+│                                                      │                  │
+│                              ┌───────────────────────┤                  │
+│                              │                       │                  │
+│                         FAISS RAG              Groq LLM                 │
+│                         (Guidelines)           (LLaMA-3.1)              │
+│                              │                       │                  │
+│                              └───────── Planning ────┘                  │
+│                                             │                           │
+│                                      Streamlit UI                       │
+│                               (Dashboard + JSON Export)                 │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Architecture Summary
+### LangGraph Agent Nodes
 
-| Layer | Responsibility | Main Files |
-| --- | --- | --- |
-| Input Layer | Accept uploaded CSV and station selection | [ui/streamlit_app.py](ui/streamlit_app.py) |
-| Validation Layer | Validate schema, impute partial inputs, detect weak signals | [utils/validation.py](utils/validation.py) |
-| ML Layer | Load trained model, generate demand forecasts, compute evaluation metrics | [ml/inference.py](ml/inference.py), [ml/evaluation.py](ml/evaluation.py) |
-| Agent Layer | Maintain explicit state and execute node-based workflow | [agent/workflow.py](agent/workflow.py), [agent/state.py](agent/state.py) |
-| Retrieval Layer | Load FAISS index and fetch infrastructure guidelines | [rag/vectorstore.py](rag/vectorstore.py), [rag/ingest.py](rag/ingest.py) |
-| Planning Layer | Optimize charger count, scheduling, utilization, and grid safety | [agent/workflow.py](agent/workflow.py) |
-| UI Layer | Present metrics, reasoning, plan, warnings, and structured output | [ui/streamlit_app.py](ui/streamlit_app.py) |
-
-## LangGraph Agent Workflow
-
-This system uses a LangGraph-based stateful agent workflow.
-
-```mermaid
-flowchart TD
-    N1["Input Node"] --> N2["Preprocessing Node"]
-    N2 --> N3["Prediction Node"]
-    N3 --> N4["Hotspot Detection Node"]
-    N4 --> N5["RAG Retrieval Node"]
-    N5 --> N6["Reasoning Node"]
-    N6 --> N7["Planning Node"]
-    N7 --> N8["Output Node"]
+```
+[Input] ──► [Preprocessing] ──► [Prediction] ──► [Hotspot Detection]
+                                                          │
+                                                   [RAG Retrieval]
+                                                          │
+                                                  [Reasoning + LLM]
+                                                          │
+                                                    [Planning]
+                                                          │
+                                                     [Output]
 ```
 
-### State Object
+---
 
-The agent state explicitly tracks the following information across node transitions:
+## 🛠️ Tech Stack
 
-| State Field | Purpose |
-| --- | --- |
-| `raw_data` | Uploaded station data selected for analysis |
-| `processed_data` | Model-ready and imputed feature frame |
-| `predictions` | Forecasted hourly demand values |
-| `hotspots` | High-load hours detected from forecast outputs |
-| `retrieved_docs` | Retrieved planning guidelines or fallback rules |
-| `reasoning` | Intermediate optimization and planning insights |
-| `final_plan` | Structured infrastructure and scheduling output |
-| `summary` | Average demand, peak demand, peak hour, risk level |
-| `errors` | Critical issues surfaced to the UI |
-| `warnings` | Non-fatal issues such as imputations or retrieval fallback |
+| Layer | Technology |
+|---|---|
+| ML / Data | scikit-learn, pandas, numpy, joblib |
+| Agent Framework | LangGraph (StateGraph) |
+| LLM | Groq API — `llama-3.1-8b-instant` |
+| Vector Store | FAISS (flat L2 index) |
+| Embeddings | sentence-transformers |
+| UI | Streamlit |
+| Deployment | Streamlit Community Cloud |
+| Language | Python 3.10+ |
 
-### Execution Logic
+---
 
-| Node | What It Does |
-| --- | --- |
-| Input Node | Filters the uploaded dataset to the chosen station and initializes workflow state |
-| Preprocessing Node | Converts features to numeric, imputes missing values, and performs data quality checks |
-| Prediction Node | Runs the trained ML model and produces demand forecasts |
-| Hotspot Detection Node | Identifies peak-load windows from grouped hourly forecasts |
-| RAG Retrieval Node | Retrieves infrastructure planning guidelines from FAISS |
-| Reasoning Node | Applies utilization, cost, smoothing, and grid-constraint reasoning |
-| Planning Node | Produces chargers, schedule, load balancing, and recommendations |
-| Output Node | Formats a consistent final payload for the UI |
+## 📁 Project Structure
 
-## Input and Output Specification
-
-### Input
-
-| Field | Required | Description |
-| --- | --- | --- |
-| `station_encoded` | Yes | Numeric station identifier used by the trained model |
-| `hour` | Yes | Hour of day for each record |
-| `dayofweek` | No | Calendar feature used if available |
-| `month` | No | Calendar feature used if available |
-| `day` | No | Calendar feature used if available |
-| `weekofyear` | No | Calendar feature used if available |
-| `hour_sin`, `hour_cos` | No | Cyclical time encoding |
-| `dow_sin`, `dow_cos` | No | Cyclical weekday encoding |
-| `lag_1` | No | Previous hour demand signal |
-| `rolling_3h`, `rolling_24h` | No | Short and medium-term rolling demand indicators |
-
-If optional fields are missing, the system imputes defaults and continues with warnings instead of crashing.
-
-### Output
-
-| Output | Description |
-| --- | --- |
-| `predictions` | Forecasted hourly demand records |
-| `avg_demand` | Average forecast demand for the selected station |
-| `peak_demand` | Highest forecast demand value |
-| `peak_hour` | Hour at which peak demand occurs |
-| `hotspots` | High-load hours surfaced as risk windows |
-| `infrastructure_plan` | Charger count, charger type, utilization target, load-balancing status |
-| `schedule` | Non-overlapping peak and off-peak strategy |
-| `recommendations` | Actionable planning guidance |
-| `reasoning` | Explainable trade-off analysis |
-| `errors` and `warnings` | Safe failure and degradation feedback |
-
-## Repository Structure
-
-| Directory | Purpose | Link |
-| --- | --- | --- |
-| `agent/` | LangGraph workflow, state definition, workflow entrypoints | [agent/](agent/) |
-| `app/` | Backward-compatible app entrypoint | [app/](app/) |
-| `ml/` | Inference configuration and model evaluation logic | [ml/](ml/) |
-| `rag/` | FAISS retrieval and guideline ingestion | [rag/](rag/) |
-| `ui/` | Streamlit application UI | [ui/](ui/) |
-| `utils/` | Validation, contracts, and shared logging | [utils/](utils/) |
-| `src/` | Original ML pipeline utilities retained for compatibility | [src/](src/) |
-| `data/` | Raw and processed datasets | [data/](data/) |
-| `models/` | Saved trained models | [models/](models/) |
-| `reports/` | Report assets and LaTeX materials | [reports/](reports/) |
-
-### Key Files
-
-| File | Purpose |
-| --- | --- |
-| [ui/streamlit_app.py](ui/streamlit_app.py) | Main Streamlit UI |
-| [agent/workflow.py](agent/workflow.py) | LangGraph node definitions and planning logic |
-| [agent/graph.py](agent/graph.py) | Graph builder and workflow runner |
-| [agent/state.py](agent/state.py) | Explicit state contract |
-| [ml/evaluation.py](ml/evaluation.py) | MAE, RMSE, R² computation from held-out data |
-| [ml/inference.py](ml/inference.py) | Prediction wrapper with failure handling |
-| [utils/validation.py](utils/validation.py) | CSV validation, imputation, data quality logic |
-| [rag/vectorstore.py](rag/vectorstore.py) | Guideline retrieval and fallback behavior |
-| [requirements.txt](requirements.txt) | Dependency list |
-
-## Model Performance
-
-The forecasting layer uses the processed hourly dataset and a chronological 80/20 split for evaluation.
-
-### Current Held-Out Metrics
-This project addresses EV charging infrastructure planning as a two-layer AI system:
-
-1. A machine learning layer forecasts hourly charging demand from historical station usage.
-2. A stateful LangGraph agent layer interprets forecast patterns, retrieves planning guidelines through RAG, and generates explainable infrastructure and scheduling recommendations.
-
-The current repository is the end-semester agentic version of the project. It extends the original forecasting pipeline into a production-oriented planning assistant with:
-
-- demand prediction
-- hotspot detection
-- LangGraph state transitions
-- FAISS-based retrieval
-- optimization-aware reasoning
-- robust failure handling
-- Streamlit-based decision support UI
-
-## Why This Project Matters
-
-EV infrastructure planning is not only a forecasting problem. Operators also need to answer questions such as:
-
-- Which stations are likely to face peak congestion?
-- How many chargers should be deployed without overbuilding?
-- When is load balancing required to avoid transformer stress?
-- Which hours should be incentivized as off-peak windows?
-
-This system is designed to move from raw usage analytics to explainable planning recommendations that are useful for real-world grid and station operations.
-
-## System Architecture
-
-The end-to-end system combines ML forecasting, agentic reasoning, retrieval, and UI delivery.
-
-```mermaid
-flowchart LR
-    A["CSV Input"] --> B["Preprocessing Layer"]
-    B --> C["ML Forecasting Model"]
-    C --> D["Demand Forecast"]
-    D --> E["LangGraph Agent"]
-    E --> F["RAG Retrieval (FAISS)"]
-    F --> G["Planning Engine"]
-    G --> H["Streamlit UI"]
+```
+EV-charging-demand-prediction/
+│
+├── agent/                  # LangGraph workflow
+│   ├── workflow.py         # All 8 node definitions + planning logic
+│   ├── graph.py            # Graph builder and run_agent_workflow()
+│   ├── state.py            # EVAgentState TypedDict
+│   └── __init__.py
+│
+├── ml/                     # ML pipeline
+│   ├── inference.py        # Prediction wrapper with failure handling
+│   ├── evaluation.py       # MAE, RMSE, R² computation
+│   └── config.py           # Feature list, model path
+│
+├── rag/                    # Retrieval-Augmented Generation
+│   ├── ingest.py           # Build and save FAISS index
+│   ├── vectorstore.py      # Query FAISS; fallback rules
+│   └── faiss_index/        # Pre-built index (committed)
+│
+├── ui/
+│   └── streamlit_app.py    # Main Streamlit dashboard
+│
+├── utils/
+│   ├── validation.py       # CSV validation and imputation
+│   ├── contracts.py        # Architecture and spec text constants
+│   └── logger.py           # Shared logging setup
+│
+├── data/                   # Raw and processed datasets
+├── models/                 # best_ev_demand_model.pkl
+├── notebooks/              # EDA and training notebooks
+├── reports/                # LaTeX report assets
+├── requirements.txt
+├── .env.example            # Environment variable template
+└── README.md
 ```
 
-### Architecture Summary
+---
 
-| Layer | Responsibility | Main Files |
-| --- | --- | --- |
-| Input Layer | Accept uploaded CSV and station selection | [ui/streamlit_app.py](ui/streamlit_app.py) |
-| Validation Layer | Validate schema, impute partial inputs, detect weak signals | [utils/validation.py](utils/validation.py) |
-| ML Layer | Load trained model, generate demand forecasts, compute evaluation metrics | [ml/inference.py](ml/inference.py), [ml/evaluation.py](ml/evaluation.py) |
-| Agent Layer | Maintain explicit state and execute node-based workflow | [agent/workflow.py](agent/workflow.py), [agent/state.py](agent/state.py) |
-| Retrieval Layer | Load FAISS index and fetch infrastructure guidelines | [rag/vectorstore.py](rag/vectorstore.py), [rag/ingest.py](rag/ingest.py) |
-| Planning Layer | Optimize charger count, scheduling, utilization, and grid safety | [agent/workflow.py](agent/workflow.py) |
-| UI Layer | Present metrics, reasoning, plan, warnings, and structured output | [ui/streamlit_app.py](ui/streamlit_app.py) |
-
-## LangGraph Agent Workflow
-
-This system uses a LangGraph-based stateful agent workflow.
-
-```mermaid
-flowchart TD
-    N1["Input Node"] --> N2["Preprocessing Node"]
-    N2 --> N3["Prediction Node"]
-    N3 --> N4["Hotspot Detection Node"]
-    N4 --> N5["RAG Retrieval Node"]
-    N5 --> N6["Reasoning Node"]
-    N6 --> N7["Planning Node"]
-    N7 --> N8["Output Node"]
-```
-
-### State Object
-
-The agent state explicitly tracks the following information across node transitions:
-
-| State Field | Purpose |
-| --- | --- |
-| `raw_data` | Uploaded station data selected for analysis |
-| `processed_data` | Model-ready and imputed feature frame |
-| `predictions` | Forecasted hourly demand values |
-| `hotspots` | High-load hours detected from forecast outputs |
-| `retrieved_docs` | Retrieved planning guidelines or fallback rules |
-| `reasoning` | Intermediate optimization and planning insights |
-| `final_plan` | Structured infrastructure and scheduling output |
-| `summary` | Average demand, peak demand, peak hour, risk level |
-| `errors` | Critical issues surfaced to the UI |
-| `warnings` | Non-fatal issues such as imputations or retrieval fallback |
-
-### Execution Logic
-
-| Node | What It Does |
-| --- | --- |
-| Input Node | Filters the uploaded dataset to the chosen station and initializes workflow state |
-| Preprocessing Node | Converts features to numeric, imputes missing values, and performs data quality checks |
-| Prediction Node | Runs the trained ML model and produces demand forecasts |
-| Hotspot Detection Node | Identifies peak-load windows from grouped hourly forecasts |
-| RAG Retrieval Node | Retrieves infrastructure planning guidelines from FAISS |
-| Reasoning Node | Applies utilization, cost, smoothing, and grid-constraint reasoning |
-| Planning Node | Produces chargers, schedule, load balancing, and recommendations |
-| Output Node | Formats a consistent final payload for the UI |
-
-## Input and Output Specification
-
-### Input
-
-| Field | Required | Description |
-| --- | --- | --- |
-| `station_encoded` | Yes | Numeric station identifier used by the trained model |
-| `hour` | Yes | Hour of day for each record |
-| `dayofweek` | No | Calendar feature used if available |
-| `month` | No | Calendar feature used if available |
-| `day` | No | Calendar feature used if available |
-| `weekofyear` | No | Calendar feature used if available |
-| `hour_sin`, `hour_cos` | No | Cyclical time encoding |
-| `dow_sin`, `dow_cos` | No | Cyclical weekday encoding |
-| `lag_1` | No | Previous hour demand signal |
-| `rolling_3h`, `rolling_24h` | No | Short and medium-term rolling demand indicators |
-
-If optional fields are missing, the system imputes defaults and continues with warnings instead of crashing.
-
-### Output
-
-| Output | Description |
-| --- | --- |
-| `predictions` | Forecasted hourly demand records |
-| `avg_demand` | Average forecast demand for the selected station |
-| `peak_demand` | Highest forecast demand value |
-| `peak_hour` | Hour at which peak demand occurs |
-| `hotspots` | High-load hours surfaced as risk windows |
-| `infrastructure_plan` | Charger count, charger type, utilization target, load-balancing status |
-| `schedule` | Non-overlapping peak and off-peak strategy |
-| `recommendations` | Actionable planning guidance |
-| `reasoning` | Explainable trade-off analysis |
-| `errors` and `warnings` | Safe failure and degradation feedback |
-
-## Repository Structure
-
-| Directory | Purpose | Link |
-| --- | --- | --- |
-| `agent/` | LangGraph workflow, state definition, workflow entrypoints | [agent/](agent/) |
-| `app/` | Backward-compatible app entrypoint | [app/](app/) |
-| `ml/` | Inference configuration and model evaluation logic | [ml/](ml/) |
-| `rag/` | FAISS retrieval and guideline ingestion | [rag/](rag/) |
-| `ui/` | Streamlit application UI | [ui/](ui/) |
-| `utils/` | Validation, contracts, and shared logging | [utils/](utils/) |
-| `src/` | Original ML pipeline utilities retained for compatibility | [src/](src/) |
-| `data/` | Raw and processed datasets | [data/](data/) |
-| `models/` | Saved trained models | [models/](models/) |
-| `reports/` | Report assets and LaTeX materials | [reports/](reports/) |
-
-### Key Files
-
-| File | Purpose |
-| --- | --- |
-| [ui/streamlit_app.py](ui/streamlit_app.py) | Main Streamlit UI |
-| [agent/workflow.py](agent/workflow.py) | LangGraph node definitions and planning logic |
-| [agent/graph.py](agent/graph.py) | Graph builder and workflow runner |
-| [agent/state.py](agent/state.py) | Explicit state contract |
-| [ml/evaluation.py](ml/evaluation.py) | MAE, RMSE, R² computation from held-out data |
-| [ml/inference.py](ml/inference.py) | Prediction wrapper with failure handling |
-| [utils/validation.py](utils/validation.py) | CSV validation, imputation, data quality logic |
-| [rag/vectorstore.py](rag/vectorstore.py) | Guideline retrieval and fallback behavior |
-| [requirements.txt](requirements.txt) | Dependency list |
-
-## Model Performance
-
-The forecasting layer uses the processed hourly dataset and a chronological 80/20 split for evaluation.
-
-### Current Held-Out Metrics
-
-| Metric | Value | Interpretation |
-| --- | --- | --- |
-| MAE | 4.13 | Average absolute forecast error is about 4.13 kWh |
-| RMSE | 6.08 | Larger errors are penalized more strongly |
-| R² Score | 0.690 | The model explains approximately 69.0% of the variance in held-out demand |
-
-### Model Comparison
-
-| Rank | Model | MAE | RMSE | R² |
-| --- | --- | --- | --- | --- |
-| 1 | Linear Regression Pipeline | 4.1284 | 6.0836 | 0.6897 |
-| 2 | Random Forest Regressor | 4.2238 | 6.3989 | 0.6567 |
-| 3 | Gradient Boosting Regressor | 4.2818 | 6.4563 | 0.6506 |
-| 4 | LightGBM Regressor | 4.4232 | 6.8204 | 0.6100 |
-| Metric | Value | Interpretation |
-| --- | --- | --- |
-| MAE | 4.13 | Average absolute forecast error is about 4.13 kWh |
-| RMSE | 6.08 | Larger errors are penalized more strongly |
-| R² Score | 0.690 | The model explains approximately 69.0% of the variance in held-out demand |
-
-### Model Comparison
-
-| Rank | Model | MAE | RMSE | R² |
-| --- | --- | --- | --- | --- |
-| 1 | Linear Regression Pipeline | 4.1284 | 6.0836 | 0.6897 |
-| 2 | Random Forest Regressor | 4.2238 | 6.3989 | 0.6567 |
-| 3 | Gradient Boosting Regressor | 4.2818 | 6.4563 | 0.6506 |
-| 4 | LightGBM Regressor | 4.4232 | 6.8204 | 0.6100 |
-
-### Evaluation Notes
-
-- The best exported model is [models/best_ev_demand_model.pkl](models/best_ev_demand_model.pkl).
-- Metrics are surfaced in the UI through [ml/evaluation.py](ml/evaluation.py).
-- The test set contains 2722 held-out rows based on chronological split.
-
-## Optimization and Planning Logic
-
-The planning layer is not a simple `peak_demand / 10` rule. It explicitly reasons over utilization, cost, peak smoothing, and grid safety.
-
-### Decision Factors
-
-| Factor | How It Is Used |
-| --- | --- |
-| Charger utilization | Target band is approximately 70% to 90% to avoid underuse and excessive queuing |
-| Cost vs performance | More chargers reduce queue risk but raise idle infrastructure cost |
-| Peak smoothing | Scheduling shifts discretionary charging away from the highest-load hour |
-| Grid constraints | Forecasts above 25 kWh trigger load-balancing logic |
-| Charger type selection | Charger profile changes with forecast intensity |
-
-### Planning Output Example
-
-| Output Element | Example Interpretation |
-| --- | --- |
-| Charger Count | Chosen because utilization remains close to target band |
-| Charger Type | Selected from Level 2 AC, Hybrid AC/DC, or DC Fast based on demand intensity |
-| Load Balancing | Enabled when peak demand risks transformer stress |
-| Schedule | Peak and off-peak windows are explicitly separated to avoid overlap |
-| Recommendations | Operational steps for pricing, balancing, and queue control |
-
-## RAG and Robustness Design
-
-### Retrieval Flow
-
-```mermaid
-flowchart LR
-    A["Demand Summary"] --> B["Query Builder"]
-    B --> C["FAISS Retrieval"]
-    C --> D["Retrieved Guidelines"]
-    C --> E["Fallback Rules"]
-    D --> F["Reasoning Node"]
-    E --> F
-```
-
-### Robustness Features
-
-| Failure Case | System Behavior |
-| --- | --- |
-| Missing required CSV columns | Shows a clear validation error with required field names |
-| Missing optional features | Imputes defaults and continues with warnings |
-| Invalid numeric feature values | Coerces and imputes values instead of crashing |
-| Model prediction failure | Returns safe prediction failure message |
-| No RAG documents retrieved | Uses fallback guideline text and sets `rag_fallback_used = true` |
-| Weak trend signal or too few records | Returns “Insufficient data for reliable planning” |
-| Agent workflow failure | Returns a safe structured fallback response |
-
-### Why This Matters for Deployment
-
-The hosted application must remain stable even when:
-
-- the uploaded CSV is incomplete
-- RAG retrieval cannot load or returns no relevant result
-- the selected station has weak demand history
-- the model or agent pipeline encounters malformed inputs
-
-## UI and Demo Flow
-
-The Streamlit app is designed to be quick to understand during a demo or viva.
-
-### UI Sections
-
-| Section | What the User Sees |
-| --- | --- |
-| Architecture | System diagram and workflow explanation |
-| Input and Output Specification | Clear contract for what to upload and what to expect |
-| Model Performance | MAE, RMSE, and R² with interpretation |
-| Executive Summary | Average demand, peak demand, peak hour, and risk level |
-| Demand Forecast | Hourly trend chart for the selected station |
-| Hotspots | Peak-load windows detected from forecast outputs |
-| Reasoning | Explainable planning logic and optimization trade-offs |
-| Infrastructure Plan | Charger count, type, utilization, and load-balancing requirement |
-| Scheduling Strategy | Peak and off-peak guidance without overlap |
-| Structured Output | JSON-style payload for technical review |
-
-## Installation and Run Instructions
-### Evaluation Notes
-
-- The best exported model is [models/best_ev_demand_model.pkl](models/best_ev_demand_model.pkl).
-- Metrics are surfaced in the UI through [ml/evaluation.py](ml/evaluation.py).
-- The test set contains 2722 held-out rows based on chronological split.
-
-## Optimization and Planning Logic
-
-The planning layer is not a simple `peak_demand / 10` rule. It explicitly reasons over utilization, cost, peak smoothing, and grid safety.
-
-### Decision Factors
-
-| Factor | How It Is Used |
-| --- | --- |
-| Charger utilization | Target band is approximately 70% to 90% to avoid underuse and excessive queuing |
-| Cost vs performance | More chargers reduce queue risk but raise idle infrastructure cost |
-| Peak smoothing | Scheduling shifts discretionary charging away from the highest-load hour |
-| Grid constraints | Forecasts above 25 kWh trigger load-balancing logic |
-| Charger type selection | Charger profile changes with forecast intensity |
-
-### Planning Output Example
-
-| Output Element | Example Interpretation |
-| --- | --- |
-| Charger Count | Chosen because utilization remains close to target band |
-| Charger Type | Selected from Level 2 AC, Hybrid AC/DC, or DC Fast based on demand intensity |
-| Load Balancing | Enabled when peak demand risks transformer stress |
-| Schedule | Peak and off-peak windows are explicitly separated to avoid overlap |
-| Recommendations | Operational steps for pricing, balancing, and queue control |
-
-## RAG and Robustness Design
-
-### Retrieval Flow
-
-```mermaid
-flowchart LR
-    A["Demand Summary"] --> B["Query Builder"]
-    B --> C["FAISS Retrieval"]
-    C --> D["Retrieved Guidelines"]
-    C --> E["Fallback Rules"]
-    D --> F["Reasoning Node"]
-    E --> F
-```
-
-### Robustness Features
-
-| Failure Case | System Behavior |
-| --- | --- |
-| Missing required CSV columns | Shows a clear validation error with required field names |
-| Missing optional features | Imputes defaults and continues with warnings |
-| Invalid numeric feature values | Coerces and imputes values instead of crashing |
-| Model prediction failure | Returns safe prediction failure message |
-| No RAG documents retrieved | Uses fallback guideline text and sets `rag_fallback_used = true` |
-| Weak trend signal or too few records | Returns “Insufficient data for reliable planning” |
-| Agent workflow failure | Returns a safe structured fallback response |
-
-### Why This Matters for Deployment
-
-The hosted application must remain stable even when:
-
-- the uploaded CSV is incomplete
-- RAG retrieval cannot load or returns no relevant result
-- the selected station has weak demand history
-- the model or agent pipeline encounters malformed inputs
-
-## UI and Demo Flow
-
-The Streamlit app is designed to be quick to understand during a demo or viva.
-
-### UI Sections
-
-| Section | What the User Sees |
-| --- | --- |
-| Architecture | System diagram and workflow explanation |
-| Input and Output Specification | Clear contract for what to upload and what to expect |
-| Model Performance | MAE, RMSE, and R² with interpretation |
-| Executive Summary | Average demand, peak demand, peak hour, and risk level |
-| Demand Forecast | Hourly trend chart for the selected station |
-| Hotspots | Peak-load windows detected from forecast outputs |
-| Reasoning | Explainable planning logic and optimization trade-offs |
-| Infrastructure Plan | Charger count, type, utilization, and load-balancing requirement |
-| Scheduling Strategy | Peak and off-peak guidance without overlap |
-| Structured Output | JSON-style payload for technical review |
-
-## Installation and Run Instructions
+## 📦 Installation
 
 ### Prerequisites
 
 - Python 3.10 or higher
-- `pip`
-- `pip`
 - Git
+- (Optional) A Groq API key for LLM reasoning — [get one free here](https://console.groq.com)
 
-### Local Setup
-### Local Setup
+### Setup
 
 ```bash
-git clone https://github.com/S-h-u-b-h-1/EV-charging-demand-prediction.git
-cd EV-charging-demand-prediction
+# 1. Clone the repository
 git clone https://github.com/S-h-u-b-h-1/EV-charging-demand-prediction.git
 cd EV-charging-demand-prediction
 
+# 2. Create a virtual environment
 python -m venv venv
-source venv/bin/activate
-source venv/bin/activate
+source venv/bin/activate        # Windows: venv\Scripts\activate
 
+# 3. Install dependencies
 pip install -r requirements.txt
 ```
 
-### Run the Streamlit App
+---
 
-```bash
-streamlit run app/streamlit_app.py
+## 🔑 Environment Variables
+
+Create a `.env` file in the project root (see `.env.example`):
+
+```env
+# Required for LLM-enhanced reasoning (free tier available)
+GROQ_API_KEY=your_groq_api_key_here
 ```
-
-### Optional Utility Runs
-
-Rebuild the FAISS index from local guideline documents:
-
-```bash
-python rag/ingest.py
-```
-
-Recompute model evaluation metrics through the app startup path:
-
-```bash
-python -c "from ml.evaluation import load_model_metrics; print(load_model_metrics())"
-```
-
-### Run the Streamlit App
-
-```bash
-streamlit run app/streamlit_app.py
-```
-
-### Optional Utility Runs
-
-Rebuild the FAISS index from local guideline documents:
-
-```bash
-python rag/ingest.py
-```
-
-Recompute model evaluation metrics through the app startup path:
-
-```bash
-python -c "from ml.evaluation import load_model_metrics; print(load_model_metrics())"
-```
-
-### Environment Configuration
-
-The current repository does not require any paid API key for the default local workflow.
 
 | Variable | Required | Purpose |
-| --- | --- | --- |
-| None for default setup | Yes | The current system runs with local model artifacts and local FAISS retrieval |
+|---|---|---|
+| `GROQ_API_KEY` | Recommended | Enables Groq LLaMA-3.1 reasoning. Falls back to rule-based if absent. |
 
-If a future deployment adds an external LLM API, the README can be extended with `.env` setup, but that is not required for the current default build.
-### Environment Configuration
+**For Streamlit Cloud deployment:** Add `GROQ_API_KEY` under **Settings → Secrets** in your Streamlit app dashboard.
 
-The current repository does not require any paid API key for the default local workflow.
+---
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| None for default setup | Yes | The current system runs with local model artifacts and local FAISS retrieval |
+## 🚀 Running the App
 
-If a future deployment adds an external LLM API, the README can be extended with `.env` setup, but that is not required for the current default build.
+### Local
 
-## Deployment
+```bash
+streamlit run ui/streamlit_app.py
+```
 
-| Component | Status | Link |
-| --- | --- | --- |
-| Hosted Streamlit Demo | Available | [Open App](https://ev-charging-demand-prediction-2026.streamlit.app/#4fdf7da3) |
-| Local Streamlit App | Available | `streamlit run app/streamlit_app.py` |
-| RAG Vector Store | Local FAISS index included | [rag/faiss_index/](rag/faiss_index/) |
+The app opens at `http://localhost:8501`.
 
-### Deployment Readiness Notes
+### Utility commands
 
-- The app surfaces warnings and errors instead of failing silently.
-- RAG fallback prevents empty retrieval from causing hallucinated planning advice.
-- The UI is structured for live presentation and quick technical review.
+```bash
+# Rebuild FAISS index from guideline documents
+python rag/ingest.py
 
-## Report and Video
-| --- | --- | --- |
-| Hosted Streamlit Demo | Available | [Open App](https://ev-charging-demand-prediction-2026.streamlit.app/#4fdf7da3) |
-| Local Streamlit App | Available | `streamlit run app/streamlit_app.py` |
-| RAG Vector Store | Local FAISS index included | [rag/faiss_index/](rag/faiss_index/) |
+# Check model evaluation metrics
+python -c "from ml.evaluation import load_model_metrics; import json; print(json.dumps(load_model_metrics(), indent=2))"
+```
 
-### Deployment Readiness Notes
+---
 
-- The app surfaces warnings and errors instead of failing silently.
-- RAG fallback prevents empty retrieval from causing hallucinated planning advice.
-- The UI is structured for live presentation and quick technical review.
+## 📥 Input / Output Specification
 
-## Report and Video
+### Input CSV
 
-| Deliverable | Status | Link |
-| --- | --- | --- |
-| LaTeX Report | In progress / maintained separately | [Overleaf Report](https://www.overleaf.com/read/gzkncnjwyhdh#29da89) |
-| Demo Video | To be added | Update this section with the final submission link |
+| Field | Required | Description |
+|---|---|---|
+| `station_encoded` | ✅ Yes | Numeric station ID |
+| `hour` | ✅ Yes | Hour of day (0–23) |
+| `dayofweek` | Optional | Calendar weekday (0=Mon) |
+| `month`, `day`, `weekofyear` | Optional | Calendar features |
+| `hour_sin`, `hour_cos` | Optional | Cyclical hour encoding |
+| `dow_sin`, `dow_cos` | Optional | Cyclical weekday encoding |
+| `lag_1` | Optional | Previous-hour demand |
+| `rolling_3h`, `rolling_24h` | Optional | Rolling demand averages |
 
-### Suggested Report Coverage
+Missing optional fields are automatically imputed with domain-appropriate defaults.
 
-- problem definition and domain context
-- ML forecasting pipeline
-- LangGraph workflow design
-- RAG retrieval strategy
-- optimization logic and planning trade-offs
-- robustness and fallback handling
-- qualitative example outputs
-| --- | --- | --- |
-| LaTeX Report | In progress / maintained separately | [Overleaf Report](https://www.overleaf.com/read/gzkncnjwyhdh#29da89) |
-| Demo Video | To be added | Update this section with the final submission link |
+### Output
 
-### Suggested Report Coverage
+```json
+{
+  "summary":   { "avg_demand": 18.4, "peak_demand": 28.1, "peak_hour": "18:00", "risk_level": "High" },
+  "hotspots":  [{ "hour": "18:00", "demand": 28.1, "severity": "High" }],
+  "infrastructure_plan": [{ "chargers": 3, "charger_type": "DC Fast Charger (50kW+)", "utilization_target": "77.8%", "load_balancing": "Required" }],
+  "schedule":  ["Peak window (17:00, 18:00, 19:00): prioritize queue control.", "Off-peak (01:00–06:00): incentivize discounted charging."],
+  "reasoning": ["Peak demand is 28.10 kWh at 18:00 with average demand 18.40 kWh.", "..."],
+  "llm_reasoning": "• 3 DC Fast Chargers maintain utilisation at 77.8%, within the 70–90% efficiency band...",
+  "llm_used": true,
+  "rag_fallback_used": false
+}
+```
 
-- problem definition and domain context
-- ML forecasting pipeline
-- LangGraph workflow design
-- RAG retrieval strategy
-- optimization logic and planning trade-offs
-- robustness and fallback handling
-- qualitative example outputs
+---
 
-## Rubric Alignment
+## 📊 Model Performance
 
-### End-Sem Evaluation Mapping
+Evaluated on **2,722 held-out rows** using a strict chronological 80/20 split.
 
-| Rubric Component | How This Repository Addresses It |
-| --- | --- |
-| Technical Implementation | LangGraph workflow, FAISS RAG, planning logic, robust UI, consistent structured outputs |
-| GitHub Repository and Code Quality | Modular directories, separated agent and RAG logic, documented setup, readable file structure |
-| Hosted Demo | Public Streamlit link included, UI built for live walkthrough, fallback handling added |
-| Project Report | Architecture, workflow, metrics, and planning logic are documented for transfer into LaTeX report |
-| Project Video | README provides a demo-ready narrative and system flow for recording |
+| Rank | Model | MAE ↓ | RMSE ↓ | R² ↑ |
+|---|---|---|---|---|
+| 🥇 1 | Linear Regression Pipeline | **4.13** | **6.08** | **0.690** |
+| 2 | Random Forest Regressor | 4.22 | 6.40 | 0.657 |
+| 3 | Gradient Boosting Regressor | 4.28 | 6.46 | 0.651 |
+| 4 | LightGBM Regressor | 4.42 | 6.82 | 0.610 |
 
-### Milestone 2 Requirements Coverage
+> The Linear Regression pipeline with polynomial feature interactions and standard
+> scaling outperformed tree-based ensembles because the hand-crafted temporal features
+> already capture the dominant demand patterns.
 
-| Requirement | Status | Where It Appears |
-| --- | --- | --- |
-| LangGraph workflow and state | Implemented | [agent/workflow.py](agent/workflow.py), [agent/state.py](agent/state.py) |
-| RAG with FAISS | Implemented | [rag/vectorstore.py](rag/vectorstore.py), [rag/faiss_index/](rag/faiss_index/) |
-| Explicit input-output specification | Implemented | [Input and Output Specification](#input-and-output-specification) |
-| System architecture diagram | Implemented | [System Architecture](#system-architecture) |
-| Working UI | Implemented | [ui/streamlit_app.py](ui/streamlit_app.py) |
-| Model evaluation report | Implemented | [Model Performance](#model-performance) |
-| Optimization reasoning | Implemented | [Optimization and Planning Logic](#optimization-and-planning-logic) |
-| Robustness and safe fallbacks | Implemented | [RAG and Robustness Design](#rag-and-robustness-design) |
+---
 
-## Contributors
+## ⚙️ Optimisation Logic
 
-| Name | Role |
-| --- | --- |
-| Rashmi | Team Member |
-| Shubhaang | Team Member |
-| Samiksha | Team Member |
-| Ankit | Team Member |
+The charger count is **not** `peak_demand / 10`. It solves:
 
-## License
+```
+n* = argmin [ δ(n) + 0.01·n ]
+```
 
-This repository is intended for academic use in the EV charging demand prediction and agentic infrastructure planning project.
+where `δ(n)` = distance of utilisation `u(n) = P_peak / (n × C_charger)` from the
+70–90% target band, and `0.01n` is a cost penalty discouraging oversizing.
 
-### End-Sem Evaluation Mapping
+| Peak Demand | Charger Type | Capacity |
+|---|---|---|
+| > 25 kWh | DC Fast Charger (50kW+) | 12.0 kWh/slot |
+| > 15 kWh | Hybrid AC/DC | 8.0 kWh/slot |
+| ≤ 15 kWh | Level 2 AC | 6.0 kWh/slot |
 
-| Rubric Component | How This Repository Addresses It |
-| --- | --- |
-| Technical Implementation | LangGraph workflow, FAISS RAG, planning logic, robust UI, consistent structured outputs |
-| GitHub Repository and Code Quality | Modular directories, separated agent and RAG logic, documented setup, readable file structure |
-| Hosted Demo | Public Streamlit link included, UI built for live walkthrough, fallback handling added |
-| Project Report | Architecture, workflow, metrics, and planning logic are documented for transfer into LaTeX report |
-| Project Video | README provides a demo-ready narrative and system flow for recording |
+---
 
-### Milestone 2 Requirements Coverage
+## 🛡️ Robustness Design
 
-| Requirement | Status | Where It Appears |
-| --- | --- | --- |
-| LangGraph workflow and state | Implemented | [agent/workflow.py](agent/workflow.py), [agent/state.py](agent/state.py) |
-| RAG with FAISS | Implemented | [rag/vectorstore.py](rag/vectorstore.py), [rag/faiss_index/](rag/faiss_index/) |
-| Explicit input-output specification | Implemented | [Input and Output Specification](#input-and-output-specification) |
-| System architecture diagram | Implemented | [System Architecture](#system-architecture) |
-| Working UI | Implemented | [ui/streamlit_app.py](ui/streamlit_app.py) |
-| Model evaluation report | Implemented | [Model Performance](#model-performance) |
-| Optimization reasoning | Implemented | [Optimization and Planning Logic](#optimization-and-planning-logic) |
-| Robustness and safe fallbacks | Implemented | [RAG and Robustness Design](#rag-and-robustness-design) |
+| Failure | System Response |
+|---|---|
+| Missing required columns | Validation error with field list |
+| Missing optional features | Imputed; warning shown |
+| Invalid numeric values | Coerced via `pd.to_numeric`; imputed |
+| Model prediction fails | Safe error message |
+| FAISS retrieval fails | Fallback rules; `rag_fallback_used=True` |
+| `GROQ_API_KEY` absent | Rule-based reasoning; no crash |
+| Groq API exception | Logged; rule-based continues |
+| Agent workflow exception | Safe structured fallback dictionary |
 
-## Contributors
+---
+
+## 🎬 Demo Video
+
+> 📹 **[Watch the Demo Video](#)** ← *(update with YouTube link after recording)*
+
+The 5-minute walkthrough covers:
+1. System overview and motivation
+2. Live CSV upload and station selection
+3. Agent workflow execution with progress bar
+4. Forecast chart + hotspot detection
+5. LLM Insight and planning output
+6. JSON export and GitHub tour
+
+---
+
+## 👥 Team
 
 | Name | Role |
-| --- | --- |
-| Rashmi | Team Member |
-| Shubhaang | Team Member |
-| Samiksha | Team Member |
-| Ankit | Team Member |
+|---|---|
+| **Rashmi** | RAG pipeline, report writing |
+| **Shubhaang** | Architecture, LangGraph, deployment |
+| **Samiksha** | ML pipeline, model evaluation |
+| **Ankit** | UI, data preprocessing |
 
-## License
+---
 
-This repository is intended for academic use in the EV charging demand prediction and agentic infrastructure planning project.
+## 🔮 Future Improvements
+
+1. **Live OCPI API integration** — real-time demand feeds from public charging networks
+2. **Multi-station joint optimisation** — jointly plan charger deployment across a grid-connected network
+3. **RL-based dynamic scheduling** — train a pricing policy to shift demand in real time
+4. **Weather + event features** — reduce the unexplained 31% demand variance
+5. **Conditional LangGraph routing** — route low-confidence predictions to a human-review node
+
+---
+
+## 📄 License
+
+This repository is intended for academic use — Project 15, AI/ML Course, 2026.
+
+---
+
+<div align="center">
+  <sub>Built with ♥️ by Team RASS · Powered by LangGraph · Groq · FAISS · Streamlit</sub>
+</div>
