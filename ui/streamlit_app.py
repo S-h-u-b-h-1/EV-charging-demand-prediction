@@ -263,7 +263,11 @@ def render_reasoning_section(result: dict[str, Any]):
     st.write("DEBUG llm_used:", result.get("llm_used"))
     st.write("DEBUG llm_reasoning length:", len(result.get("llm_reasoning", "")))
 
-    llm_text = result.get("llm_reasoning", "").strip()
+    if not result:
+        st.error("Result is empty — workflow failed")
+        return
+
+    llm_text = str(result.get("llm_reasoning", "")).strip()
 
     # fallback extraction (safety)
     if not llm_text:
@@ -463,11 +467,22 @@ def main() -> None:
             status.write("3/4 — Retrieving guidelines and generating reasoning")
             progress_bar.progress(75)
 
-            result = run_agent_workflow(
-                raw_data=uploaded_df.to_dict(orient="records"),
-                selected_station=selected_station,
-                model=model,
-            )
+            st.write("🚀 Starting workflow...")
+
+            try:
+                result = run_agent_workflow(
+                    raw_data=uploaded_df.to_dict(orient="records"),
+                    selected_station=selected_station,
+                    model=model,
+                )
+
+                st.write("✅ Workflow finished")
+                st.write("DEBUG RESULT KEYS:", list(result.keys()) if result else "None")
+
+            except Exception as e:
+                st.error("❌ Workflow crashed")
+                st.exception(e)
+                return
 
             progress_bar.progress(100)
             status.update(label="Workflow completed successfully", state="complete")
