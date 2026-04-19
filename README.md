@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ ChargeSense
+# ChargeSense
 ### Intelligent EV Charging Demand Prediction & Agentic Infrastructure Planning
 
 *From raw session data to explainable, AI-driven deployment decisions — in one pipeline.*
@@ -20,16 +20,16 @@
 > reasons with a Groq-hosted LLaMA-3.1 LLM, and generates optimised charger
 > placement and scheduling recommendations — all deployed publicly on Streamlit Cloud.
 
-[🚀 Live Demo](https://ev-charging-demand-prediction-2026.streamlit.app) &nbsp;·&nbsp;
-[📄 LaTeX Report](https://www.overleaf.com/read/gzkncnjwyhdh#29da89) &nbsp;·&nbsp;
-[🎬 Demo Video](#demo-video) &nbsp;·&nbsp;
-[📦 Requirements](requirements.txt)
+[Live Demo](https://ev-charging-demand-prediction-2026.streamlit.app) &nbsp;·&nbsp;
+[LaTeX Report](https://www.overleaf.com/read/gzkncnjwyhdh#29da89) &nbsp;·&nbsp;
+[Demo Video](#demo-video) &nbsp;·&nbsp;
+[Requirements](requirements.txt)
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Why ChargeSense?](#-why-chargesense)
 - [Features](#-features)
@@ -49,7 +49,7 @@
 
 ---
 
-## 🌍 Why ChargeSense?
+## Why ChargeSense?
 
 The global EV fleet is projected to exceed **300 million vehicles by 2030**. Infrastructure
 planners face a hard problem every day:
@@ -63,19 +63,19 @@ planners face a hard problem every day:
 
 ---
 
-## ✨ Features
+## Features
 
-- **📈 ML Demand Forecasting** — scikit-learn pipeline with cyclical encoding, lag features, and 4-model comparison. Best model: Linear Regression (MAE 4.13 kWh, R² 0.69).
-- **🧠 LangGraph Agentic Workflow** — 8-node stateful graph: Input → Preprocessing → Prediction → Hotspot Detection → RAG Retrieval → Reasoning → Planning → Output.
-- **📚 FAISS-based RAG** — planning guidelines from IEEE, NREL, and DOE retrieved and injected into LLM context at inference time.
-- **🤖 Groq LLM Reasoning** — LLaMA-3.1-8b-instant generates 4-point explainable planning rationale grounded in retrieved documents.
-- **🛡️ Layered Robustness** — graceful degradation at every failure point: missing columns, retrieval failure, LLM unavailability. No silent crashes.
-- **📊 Streamlit Dashboard** — professional UI with metrics, forecast charts, hotspot tables, reasoning display, and JSON export.
-- **☁️ Free-tier Deployed** — Streamlit Community Cloud. No paid API required for the default flow; Groq free tier handles LLM calls.
+- ** ML Demand Forecasting** — scikit-learn pipeline with cyclical encoding, lag features, and 4-model comparison. Best model: Linear Regression (MAE 4.13 kWh, R² 0.69).
+- ** LangGraph Agentic Workflow** — 8-node stateful graph: Input → Preprocessing → Prediction → Hotspot Detection → RAG Retrieval → Reasoning → Planning → Output.
+- ** FAISS-based RAG** — planning guidelines from IEEE, NREL, and DOE retrieved and injected into LLM context at inference time.
+- ** Groq LLM Reasoning** — LLaMA-3.1-8b-instant generates 4-point explainable planning rationale grounded in retrieved documents.
+- ** Layered Robustness** — graceful degradation at every failure point: missing columns, retrieval failure, LLM unavailability. No silent crashes.
+- ** Streamlit Dashboard** — professional UI with metrics, forecast charts, hotspot tables, reasoning display, and JSON export.
+- ** Free-tier Deployed** — Streamlit Community Cloud. No paid API required for the default flow; Groq free tier handles LLM calls.
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -111,7 +111,7 @@ planners face a hard problem every day:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -126,7 +126,7 @@ planners face a hard problem every day:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 EV-charging-demand-prediction/
@@ -166,7 +166,7 @@ EV-charging-demand-prediction/
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 
@@ -191,7 +191,7 @@ pip install -r requirements.txt
 
 ---
 
-## 🔑 Environment Variables
+## Environment Variables
 
 Create a `.env` file in the project root (see `.env.example`):
 
@@ -208,7 +208,7 @@ GROQ_API_KEY=your_groq_api_key_here
 
 ---
 
-## 🚀 Running the App
+## Running the App
 
 ### Local
 
@@ -230,7 +230,7 @@ python -c "from ml.evaluation import load_model_metrics; import json; print(json
 
 ---
 
-## 📥 Input / Output Specification
+## Input / Output Specification
 
 ### Input CSV
 
@@ -264,13 +264,13 @@ Missing optional fields are automatically imputed with domain-appropriate defaul
 
 ---
 
-## 📊 Model Performance
+##  Model Performance
 
 Evaluated on **2,722 held-out rows** using a strict chronological 80/20 split.
 
 | Rank | Model | MAE ↓ | RMSE ↓ | R² ↑ |
 |---|---|---|---|---|
-| 🥇 1 | Linear Regression Pipeline | **4.13** | **6.08** | **0.690** |
+| 1 | Linear Regression Pipeline | **4.13** | **6.08** | **0.690** |
 | 2 | Random Forest Regressor | 4.22 | 6.40 | 0.657 |
 | 3 | Gradient Boosting Regressor | 4.28 | 6.46 | 0.651 |
 | 4 | LightGBM Regressor | 4.42 | 6.82 | 0.610 |
@@ -281,7 +281,7 @@ Evaluated on **2,722 held-out rows** using a strict chronological 80/20 split.
 
 ---
 
-## ⚙️ Optimisation Logic
+##  Optimisation Logic
 
 The charger count is **not** `peak_demand / 10`. It solves:
 
@@ -300,7 +300,7 @@ where `δ(n)` = distance of utilisation `u(n) = P_peak / (n × C_charger)` from 
 
 ---
 
-## 🛡️ Robustness Design
+## Robustness Design
 
 | Failure | System Response |
 |---|---|
@@ -315,9 +315,9 @@ where `δ(n)` = distance of utilisation `u(n) = P_peak / (n × C_charger)` from 
 
 ---
 
-## 🎬 Demo Video
+## Demo Video
 
-> 📹 **[Watch the Demo Video](#)** ← *(update with YouTube link after recording)*
+> **[Watch the Demo Video](#)** ← *(update with YouTube link after recording)*
 
 The 5-minute walkthrough covers:
 1. System overview and motivation
@@ -329,7 +329,7 @@ The 5-minute walkthrough covers:
 
 ---
 
-## 👥 Team
+## Team
 
 | Name | Role |
 |---|---|
@@ -340,7 +340,7 @@ The 5-minute walkthrough covers:
 
 ---
 
-## 🔮 Future Improvements
+## Future Improvements
 
 1. **Live OCPI API integration** — real-time demand feeds from public charging networks
 2. **Multi-station joint optimisation** — jointly plan charger deployment across a grid-connected network
@@ -350,12 +350,12 @@ The 5-minute walkthrough covers:
 
 ---
 
-## 📄 License
+## License
 
 This repository is intended for academic use — Project 15, AI/ML Course, 2026.
 
 ---
 
 <div align="center">
-  <sub>Built with ♥️ by Team RASS · Powered by LangGraph · Groq · FAISS · Streamlit</sub>
+  <sub>Built with by Team RASS · Powered by LangGraph · Groq · FAISS · Streamlit</sub>
 </div>
