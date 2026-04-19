@@ -20,8 +20,8 @@
 > reasons with a Groq-hosted LLaMA-3.1 LLM, and generates optimised charger
 > placement and scheduling recommendations — all deployed publicly on Streamlit Cloud.
 
-[Live Demo](https://ev-charging-demand-prediction-2026.streamlit.app) &nbsp;·&nbsp;
-[LaTeX Report](https://www.overleaf.com/read/gzkncnjwyhdh#29da89) &nbsp;·&nbsp;
+[Live Demo](https://ev-charging-demand-prediction-saamcexbagk7gmpmdfotqd.streamlit.app/) &nbsp;·&nbsp;
+[LaTeX Report](https://www.overleaf.com/project/69e4ce549676b0b08627ab2d) &nbsp;·&nbsp;
 [Demo Video](#demo-video) &nbsp;·&nbsp;
 [Requirements](requirements.txt)
 
