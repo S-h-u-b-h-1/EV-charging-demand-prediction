@@ -1,11 +1,15 @@
 from __future__ import annotations
-from dotenv import load_dotenv
-load_dotenv()
+
 import math
+import os
 from typing import Any
 
 import pandas as pd
+from dotenv import load_dotenv
+from groq import Groq
 from langgraph.graph import END, StateGraph
+
+load_dotenv()
 
 from agent.state import EVAgentState
 from ml.config import MODEL_FEATURES
@@ -13,14 +17,16 @@ from ml.inference import PREDICTION_FAILURE_MESSAGE, run_prediction
 from rag.vectorstore import retrieve_guidelines
 from utils.logger import get_logger
 from utils.validation import build_data_quality_summary, prepare_feature_frame
-from groq import Groq
-import os
 
 logger = get_logger(__name__)
 
 RAG_FALLBACK_MESSAGE = "No planning guidelines retrieved. Using default EV infrastructure rules."
 INSUFFICIENT_DATA_MESSAGE = "Insufficient data for reliable planning"
 
+
+# ══════════════════════════════════════════════════════════════════════
+# NODE DEFINITIONS
+# ══════════════════════════════════════════════════════════════════════
 
 def input_node(state: EVAgentState) -> EVAgentState:
     raw_records = state.get("raw_data", [])
@@ -31,6 +37,7 @@ def input_node(state: EVAgentState) -> EVAgentState:
 
     raw_df = pd.DataFrame(raw_records)
     selected_station = state.get("selected_station")
+
     if "station_encoded" in raw_df.columns:
         raw_df["station_encoded"] = pd.to_numeric(raw_df["station_encoded"], errors="coerce")
         raw_df = raw_df.dropna(subset=["station_encoded"])
@@ -55,7 +62,10 @@ def preprocessing_node(state: EVAgentState) -> EVAgentState:
     raw_df = pd.DataFrame(state.get("raw_data", []))
     if raw_df.empty:
         state["processed_data"] = []
-        state["data_quality"] = {"insufficient_data": True, "insufficient_reasons": ["No rows available after input filtering."]}
+        state["data_quality"] = {
+            "insufficient_data": True,
+            "insufficient_reasons": ["No rows available after input filtering."],
+        }
         return state
 
     processed_df, warnings = prepare_feature_frame(raw_df)
@@ -72,6 +82,7 @@ def preprocessing_node(state: EVAgentState) -> EVAgentState:
 def prediction_node(state: EVAgentState) -> EVAgentState:
     processed_df = pd.DataFrame(state.get("processed_data", []))
     model = state.get("model")
+
     if processed_df.empty or model is None:
         state.setdefault("errors", []).append(PREDICTION_FAILURE_MESSAGE)
         state["predictions"] = []
@@ -86,7 +97,9 @@ def prediction_node(state: EVAgentState) -> EVAgentState:
         return state
 
     processed_df["predicted_demand"] = predictions
-    state["predictions"] = processed_df[["hour", "station_encoded", "predicted_demand"]].to_dict(orient="records")
+    state["predictions"] = processed_df[
+        ["hour", "station_encoded", "predicted_demand"]
+    ].to_dict(orient="records")
     return state
 
 
@@ -99,7 +112,9 @@ def hotspot_detection_node(state: EVAgentState) -> EVAgentState:
     hourly = prediction_df.groupby("hour")["predicted_demand"].mean().reset_index()
     std_value = float(hourly["predicted_demand"].std()) if len(hourly) > 1 else 0.0
     threshold = float(hourly["predicted_demand"].mean()) + (0.0 if pd.isna(std_value) else std_value)
-    hotspots_df = hourly[hourly["predicted_demand"] > threshold].sort_values("predicted_demand", ascending=False)
+    hotspots_df = hourly[hourly["predicted_demand"] > threshold].sort_values(
+        "predicted_demand", ascending=False
+    )
 
     state["hotspots"] = [
         {
@@ -114,7 +129,9 @@ def hotspot_detection_node(state: EVAgentState) -> EVAgentState:
 
 def rag_retrieval_node(state: EVAgentState) -> EVAgentState:
     prediction_df = pd.DataFrame(state.get("predictions", []))
-    peak_demand = float(prediction_df["predicted_demand"].max()) if not prediction_df.empty else 0.0
+    peak_demand = (
+        float(prediction_df["predicted_demand"].max()) if not prediction_df.empty else 0.0
+    )
     query = (
         "EV charging infrastructure planning for hourly demand forecast. "
         f"Peak demand {peak_demand:.2f} kWh. Include charger utilization, load balancing, "
@@ -142,6 +159,7 @@ def reasoning_node(state: EVAgentState) -> EVAgentState:
         state["reasoning"] = [INSUFFICIENT_DATA_MESSAGE] + reasons
         state["reasoning_summary"] = INSUFFICIENT_DATA_MESSAGE
         state["llm_used"] = False
+        state["llm_reasoning"] = ""
         return state
 
     hourly = prediction_df.groupby("hour")["predicted_demand"].mean().reset_index()
@@ -161,7 +179,6 @@ def reasoning_node(state: EVAgentState) -> EVAgentState:
         if load_balancing_required
         else "Grid load remains within normal operating threshold."
     )
-
     smoothing_target = max(avg_demand, peak_demand * 0.85)
 
     reasoning = [
@@ -188,33 +205,32 @@ def reasoning_node(state: EVAgentState) -> EVAgentState:
         api_key = os.getenv("GROQ_API_KEY")
         if api_key:
             client = Groq(api_key=api_key)
-
             rag_context = "\n".join(state.get("retrieved_docs", []))[:2000]
 
-            prompt = f"""
-You are an EV infrastructure planning expert.
+            prompt = f"""You are an expert EV infrastructure planning engineer.
 
 Demand Summary:
-- Peak demand: {peak_demand:.2f} kWh
-- Peak hour: {peak_hour}:00
-- Average demand: {avg_demand:.2f} kWh
-- Recommended chargers: {chosen_count}
-- Charger type: {charger_type}
+- Station peak demand: {peak_demand:.2f} kWh at hour {peak_hour}:00
+- Average hourly demand: {avg_demand:.2f} kWh
+- Recommended chargers: {chosen_count} x {charger_type}
+- Expected utilization: {chosen_utilization * 100:.1f}%
+- Grid threshold triggered: {"Yes" if load_balancing_required else "No"}
 
-Retrieved Guidelines:
+Retrieved Planning Guidelines:
 {rag_context}
 
-Write a short planning rationale in 4 bullet points covering:
-1. Why this charger count is correct
-2. Grid risk level
-3. Scheduling strategy
-4. Cost vs utilization tradeoff
-"""
+Write a complete, professional planning rationale with exactly 4 bullet points:
+1. Why {chosen_count} chargers is the correct count (reference the utilization target band)
+2. Grid risk level and what mitigation steps are needed
+3. Scheduling strategy (when to charge, when to incentivise off-peak)
+4. Cost vs utilization trade-off analysis
+
+Be specific, use the numbers provided, and write in full sentences. Do not cut off mid-sentence."""
 
             response = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=300,
+                max_tokens=600,  # ← increased from 300 to prevent truncation
             )
 
             llm_text = response.choices[0].message.content.strip()
@@ -228,7 +244,9 @@ Write a short planning rationale in 4 bullet points covering:
         logger.warning("LLM call failed: %s", e)
 
     state["reasoning"] = reasoning
-    state["reasoning_summary"] = " ".join(reasoning)
+    state["reasoning_summary"] = " ".join(
+        r for r in reasoning if "LLM Insight:" not in r
+    )
     state["llm_reasoning"] = llm_text
 
     state["summary"] = {
@@ -248,15 +266,13 @@ Write a short planning rationale in 4 bullet points covering:
         "peak_hour": peak_hour,
         "avg_demand": avg_demand,
     }
-    print("LLM USED IN NODE:", state.get("llm_used"))
-    print("LLM REASONING LEN:", len(state.get("llm_reasoning", "")))
-    print("REASONING LAST ITEM:", state.get("reasoning", [])[-1] if state.get("reasoning") else "EMPTY")
+
     return state
 
 
 def planning_node(state: EVAgentState) -> EVAgentState:
     if state.get("insufficient_data"):
-        safe_plan = {
+        state["final_plan"] = {
             "infrastructure_plan": [
                 {
                     "station_id": state.get("selected_station", "unknown"),
@@ -270,14 +286,15 @@ def planning_node(state: EVAgentState) -> EVAgentState:
             "recommendations": [INSUFFICIENT_DATA_MESSAGE],
             "explanation": INSUFFICIENT_DATA_MESSAGE,
         }
-        state["final_plan"] = safe_plan
         return state
 
     optimization = state.get("optimization", {})
     prediction_df = pd.DataFrame(state.get("predictions", []))
     hourly = prediction_df.groupby("hour")["predicted_demand"].mean().reset_index()
     peak_hour = int(optimization["peak_hour"])
-    peak_hours = sorted({hour for hour in [peak_hour - 1, peak_hour, peak_hour + 1] if 0 <= hour <= 23})
+    peak_hours = sorted(
+        {hour for hour in [peak_hour - 1, peak_hour, peak_hour + 1] if 0 <= hour <= 23}
+    )
     off_peak_hours = _select_off_peak_hours(hourly, peak_hours, limit=6)
 
     infrastructure_plan = [
@@ -292,21 +309,26 @@ def planning_node(state: EVAgentState) -> EVAgentState:
     ]
 
     schedule = [
-        f"Peak window ({', '.join(f'{hour}:00' for hour in peak_hours)}): prioritize queue control and defer flexible charging.",
-        f"Off-peak window ({', '.join(f'{hour}:00' for hour in off_peak_hours)}): incentivize discounted charging and background fleet charging.",
-        "Apply smart scheduling to shift 10-15% of discretionary demand from peak to off-peak hours.",
+        f"Peak window ({', '.join(f'{h}:00' for h in peak_hours)}): prioritize queue control and defer flexible charging.",
+        f"Off-peak window ({', '.join(f'{h}:00' for h in off_peak_hours)}): incentivize discounted charging and background fleet charging.",
+        "Apply smart scheduling to shift 10–15% of discretionary demand from peak to off-peak hours.",
     ]
 
     recommendations = [
         f"Deploy {optimization['charger_count']} {optimization['charger_type']} units for balanced utilization and acceptable queue risk.",
-        "Enable load balancing controls whenever predicted demand crosses the 25 kWh grid threshold." if optimization["grid_constraint_triggered"] else "Keep monitoring transformer loading; dynamic balancing can remain on standby.",
+        (
+            "Enable load balancing controls whenever predicted demand crosses the 25 kWh grid threshold."
+            if optimization["grid_constraint_triggered"]
+            else "Keep monitoring transformer loading; dynamic balancing can remain on standby."
+        ),
         "Use time-of-use pricing and reservation nudges to smooth demand before the peak hour.",
     ]
 
     explanation = (
-        f"The plan chooses {optimization['charger_count']} chargers instead of a simple peak/10 rule because it optimizes "
-        f"for 70-90% utilization, manages grid risk, and avoids overspending on idle infrastructure. "
-        f"Peak demand is served with {optimization['target_utilization'] * 100:.1f}% expected utilization."
+        f"The plan chooses {optimization['charger_count']} chargers instead of a simple peak÷10 rule "
+        f"because it optimizes for 70–90% utilization, manages grid risk, and avoids overspending on "
+        f"idle infrastructure. Peak demand is served with {optimization['target_utilization'] * 100:.1f}% "
+        f"expected utilization."
     )
 
     state["final_plan"] = {
@@ -329,18 +351,23 @@ def output_node(state: EVAgentState) -> dict[str, Any]:
         "reasoning": state.get("reasoning", []),
         "reasoning_summary": state.get("reasoning_summary", ""),
         "llm_reasoning": state.get("llm_reasoning", ""),
+        "llm_used": state.get("llm_used", False),
         "final_plan": state.get("final_plan", {}),
         "summary": state.get("summary", {}),
         "errors": list(dict.fromkeys(state.get("errors", []))),
         "warnings": list(dict.fromkeys(state.get("warnings", []))),
         "rag_fallback_used": state.get("rag_fallback_used", False),
         "insufficient_data": state.get("insufficient_data", False),
-        "llm_used": state.get("llm_used", False),
     }
 
 
+# ══════════════════════════════════════════════════════════════════════
+# GRAPH BUILDER
+# ══════════════════════════════════════════════════════════════════════
+
 def build_workflow():
     workflow = StateGraph(EVAgentState)
+
     workflow.add_node("input", input_node)
     workflow.add_node("preprocessing", preprocessing_node)
     workflow.add_node("prediction", prediction_node)
@@ -359,8 +386,13 @@ def build_workflow():
     workflow.add_edge("reasoning", "planning")
     workflow.add_edge("planning", "output")
     workflow.add_edge("output", END)
+
     return workflow.compile()
 
+
+# ══════════════════════════════════════════════════════════════════════
+# HELPER FUNCTIONS
+# ══════════════════════════════════════════════════════════════════════
 
 def _select_charger_profile(peak_demand: float) -> tuple[str, float, str]:
     if peak_demand > 25:
@@ -370,16 +402,25 @@ def _select_charger_profile(peak_demand: float) -> tuple[str, float, str]:
     return "Level 2 AC Charger", 6.0, "Lower capex / moderate service speed"
 
 
-def _optimize_charger_count(peak_demand: float, nominal_capacity: float) -> tuple[int, float, dict[str, float | None]]:
-    target_low = 0.70
-    target_high = 0.90
+def _optimize_charger_count(
+    peak_demand: float, nominal_capacity: float
+) -> tuple[int, float, dict[str, float | None]]:
+    target_low, target_high = 0.70, 0.90
     candidates = []
-
     max_count = max(2, int(math.ceil(max(peak_demand, nominal_capacity) / nominal_capacity)) + 3)
+
     for count in range(1, max_count + 1):
-        utilization = peak_demand / (count * nominal_capacity) if count > 0 and nominal_capacity > 0 else 0.0
+        utilization = (
+            peak_demand / (count * nominal_capacity)
+            if count > 0 and nominal_capacity > 0
+            else 0.0
+        )
         within_band = target_low <= utilization <= target_high
-        distance = 0.0 if within_band else min(abs(utilization - target_low), abs(utilization - target_high))
+        distance = (
+            0.0
+            if within_band
+            else min(abs(utilization - target_low), abs(utilization - target_high))
+        )
         cost_penalty = count * 0.01
         candidates.append((distance + cost_penalty, count, utilization))
 
@@ -388,7 +429,6 @@ def _optimize_charger_count(peak_demand: float, nominal_capacity: float) -> tupl
     fewer_utilization = None
     if chosen_count > 1:
         fewer_utilization = peak_demand / ((chosen_count - 1) * nominal_capacity)
-
     more_utilization = peak_demand / ((chosen_count + 1) * nominal_capacity)
 
     return chosen_count, chosen_utilization, {
@@ -405,10 +445,11 @@ def _risk_level(peak_demand: float) -> str:
     return "Low"
 
 
-def _select_off_peak_hours(hourly: pd.DataFrame, peak_hours: list[int], limit: int) -> list[int]:
+def _select_off_peak_hours(
+    hourly: pd.DataFrame, peak_hours: list[int], limit: int
+) -> list[int]:
     if hourly.empty:
-        base_hours = [0, 1, 2, 3, 4, 5]
-        return [hour for hour in base_hours if hour not in peak_hours][:limit]
+        return [h for h in [0, 1, 2, 3, 4, 5] if h not in peak_hours][:limit]
 
     off_peak = (
         hourly[~hourly["hour"].isin(peak_hours)]
@@ -418,7 +459,7 @@ def _select_off_peak_hours(hourly: pd.DataFrame, peak_hours: list[int], limit: i
     )
 
     if len(off_peak) < limit:
-        fallback_hours = [hour for hour in range(24) if hour not in peak_hours and hour not in off_peak]
-        off_peak.extend(fallback_hours)
+        fallback = [h for h in range(24) if h not in peak_hours and h not in off_peak]
+        off_peak.extend(fallback)
 
     return off_peak[:limit]
