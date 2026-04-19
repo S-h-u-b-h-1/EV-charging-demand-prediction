@@ -212,7 +212,7 @@ Write a short planning rationale in 4 bullet points covering:
 """
 
             response = client.chat.completions.create(
-                model="llama3-8b-8192",
+                model="llama-3.1-8b-instant",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=300,
             )
@@ -248,7 +248,9 @@ Write a short planning rationale in 4 bullet points covering:
         "peak_hour": peak_hour,
         "avg_demand": avg_demand,
     }
-
+    print("LLM USED IN NODE:", state.get("llm_used"))
+    print("LLM REASONING LEN:", len(state.get("llm_reasoning", "")))
+    print("REASONING LAST ITEM:", state.get("reasoning", [])[-1] if state.get("reasoning") else "EMPTY")
     return state
 
 
@@ -326,12 +328,14 @@ def output_node(state: EVAgentState) -> dict[str, Any]:
         "retrieved_docs": state.get("retrieved_docs", []),
         "reasoning": state.get("reasoning", []),
         "reasoning_summary": state.get("reasoning_summary", ""),
+        "llm_reasoning": state.get("llm_reasoning", ""),
         "final_plan": state.get("final_plan", {}),
         "summary": state.get("summary", {}),
         "errors": list(dict.fromkeys(state.get("errors", []))),
         "warnings": list(dict.fromkeys(state.get("warnings", []))),
         "rag_fallback_used": state.get("rag_fallback_used", False),
         "insufficient_data": state.get("insufficient_data", False),
+        "llm_used": state.get("llm_used", False),
     }
 
 
