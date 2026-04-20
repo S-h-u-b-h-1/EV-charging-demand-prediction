@@ -20,9 +20,9 @@
 > reasons with a Groq-hosted LLaMA-3.1 LLM, and generates optimised charger
 > placement and scheduling recommendations — all deployed publicly on Streamlit Cloud.
 
-[Live Demo](https://ev-charging-demand-prediction-2026.streamlit.app) &nbsp;·&nbsp;
-[LaTeX Report](https://www.overleaf.com/read/gzkncnjwyhdh#29da89) &nbsp;·&nbsp;
-[Demo Video](#demo-video) &nbsp;·&nbsp;
+[Live Demo](https://ev-charging-demand-prediction-saamcexbagk7gmpmdfotqd.streamlit.app/) &nbsp;·&nbsp;
+[LaTeX Report](https://www.overleaf.com/project/69a496d6a1614e5e9b19ebf4) &nbsp;·&nbsp;
+[Demo Video](https://drive.google.com/drive/u/0/folders/19HYRTDuOrsZs-l0AIeViUxW-J9pSCh3G) &nbsp;·&nbsp;
 [Requirements](requirements.txt)
 
 </div>
@@ -317,7 +317,7 @@ where `δ(n)` = distance of utilisation `u(n) = P_peak / (n × C_charger)` from 
 
 ## Demo Video
 
-> **[Watch the Demo Video](#)** ← *(update with YouTube link after recording)*
+> **[Watch the Demo Video](https://drive.google.com/drive/u/0/folders/19HYRTDuOrsZs-l0AIeViUxW-J9pSCh3G)** 
 
 The 5-minute walkthrough covers:
 1. System overview and motivation
