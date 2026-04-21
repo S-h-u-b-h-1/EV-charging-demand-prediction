@@ -21,7 +21,7 @@
 > placement and scheduling recommendations — all deployed publicly on Streamlit Cloud.
 
 [Live Demo](https://ev-charging-demand-prediction-saamcexbagk7gmpmdfotqd.streamlit.app/) &nbsp;·&nbsp;
-[LaTeX Report](https://www.overleaf.com/project/69a496d6a1614e5e9b19ebf4) &nbsp;·&nbsp;
+[LaTeX Report](https://www.overleaf.com/read/vygrphzybbrt#39fc85) &nbsp;·&nbsp;
 [Demo Video](https://drive.google.com/drive/u/0/folders/19HYRTDuOrsZs-l0AIeViUxW-J9pSCh3G) &nbsp;·&nbsp;
 [Requirements](requirements.txt)
 
